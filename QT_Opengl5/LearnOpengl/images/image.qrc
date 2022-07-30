@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/iamge">
+        <file>awesomeface.png</file>
+        <file>small.png</file>
+        <file>wall.jpg</file>
+    </qresource>
+</RCC>
