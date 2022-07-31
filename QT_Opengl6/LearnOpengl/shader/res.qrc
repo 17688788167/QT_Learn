@@ -4,5 +4,9 @@
         <file>shapes.vs</file>
         <file>shapes1.fs</file>
         <file>shapes1.vs</file>
+        <file>light.vs</file>
+        <file>light.fs</file>
+        <file>object.vs</file>
+        <file>object.fs</file>
     </qresource>
 </RCC>

@@ -100,8 +100,15 @@ void MyOpenglWidget::initializeGL()
 
     foreach(auto item,cubePositions)
     {
-        Actor* actorTemp=new Actor(this,":/shaders/shapes.vs",":/shaders/shapes.fs",":/iamge/wall.jpg");
-        ActorVector.push_back(actorTemp);
+        Actor* actorTemp;
+        if(ActorVector.size()==5)
+        {
+            actorTemp=new Actor(this,":/shaders/light.vs",":/shaders/light.fs",":/iamge/wall.jpg");
+        }
+        else
+        {
+            actorTemp=new Actor(this,":/shaders/object.vs",":/shaders/object.fs",":/iamge/wall.jpg");
+        }
         actorTemp->UpdateModel(1,item.x(),item.y(),item.z(),0,QVector3D(0,0,1));
         ActorVector.push_back(actorTemp);
         glGenVertexArrays(1, &actorTemp->glData.VAO);
@@ -124,6 +131,8 @@ void MyOpenglWidget::initializeGL()
 
         actorTemp->m_shader.bind();
         actorTemp->m_shader.setUniformValue("ratio",ratio);
+        actorTemp->m_shader.setUniformValue("objectColor",1.0f, 0.5f, 0.31f);
+        actorTemp->m_shader.setUniformValue("lightColor",1.0f, 1.0f, 1.0f);
     }
 }
 
@@ -219,6 +228,9 @@ void MyOpenglWidget::keyPressEvent(QKeyEvent *event)
         break;
     case Qt::Key_A:
         keyboard|= 1<<5;
+        break;
+    case Qt::Key_R:
+        m_camera.ResetCamera();
         break;
 
     }

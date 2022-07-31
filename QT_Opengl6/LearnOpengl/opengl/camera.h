@@ -23,6 +23,9 @@ const float SPEED       =  2.5f;
 const float SENSITIVITY =  0.1f;
 const float ZOOM        =  45.0f;
 
+const QVector3D POSITION= QVector3D(0,0,-3);
+const QVector3D UP= QVector3D(0,1,0);
+const QVector3D FRONT= QVector3D(0,0,-1);
 
 // 一个抽象的camera类，用于处理输入并计算相应的Euler角度、向量和矩阵，以便在OpenGL中使用
 class Camera
@@ -43,7 +46,7 @@ public:
     float Zoom;
 
     // constructor with vectors
-    Camera(QVector3D position = QVector3D(0.0f, 0.0f, 0.0f), QVector3D up = QVector3D(0.0f, 1.0f, 0.0f), float yaw = YAW, float pitch = PITCH) : Front(QVector3D(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM)
+    Camera(QVector3D position = POSITION, QVector3D up = UP, float yaw = YAW, float pitch = PITCH) : Front(FRONT), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM)
     {
         Position = position;
         WorldUp = up;
@@ -67,6 +70,16 @@ public:
         QMatrix4x4 theMatrix;
         theMatrix.lookAt(Position, Position + Front, Up);
         return theMatrix;
+    }
+
+    void ResetCamera()
+    {
+        Position=POSITION;
+        WorldUp=UP;
+        Yaw=YAW;
+        Pitch=PITCH;
+        Front=FRONT;
+        Zoom=ZOOM;
     }
 
     // 处理从任何类似键盘的输入系统接收的输入。接受摄像机定义枚举形式的输入参数（从窗口系统中提取）
