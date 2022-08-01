@@ -23,7 +23,7 @@ const float SPEED       =  2.5f;
 const float SENSITIVITY =  0.1f;
 const float ZOOM        =  45.0f;
 
-const QVector3D POSITION= QVector3D(0,0,-3);
+const QVector3D POSITION= QVector3D(0,0,3);
 const QVector3D UP= QVector3D(0,1,0);
 const QVector3D FRONT= QVector3D(0,0,-1);
 

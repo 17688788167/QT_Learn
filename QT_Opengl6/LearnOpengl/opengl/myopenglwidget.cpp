@@ -15,6 +15,51 @@ QVector3D( 1.5f, 2.0f, -2.5f),
 QVector3D( 1.5f, 0.2f, -1.5f),
 QVector3D(-1.3f, 1.0f, -1.5f)
 };
+
+float vertices_N[] = {
+       -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+        0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+        0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+        0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+       -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+       -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+
+       -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+        0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+        0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+        0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+       -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+       -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+
+       -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+       -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+       -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+       -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+       -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+       -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+
+        0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+        0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+        0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+        0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+        0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+        0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+
+       -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+        0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+        0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+        0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+       -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+       -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+
+       -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+        0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+        0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+        0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+       -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+       -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
+   };
+
 MyOpenglWidget::MyOpenglWidget(QWidget *parent) : QOpenGLWidget(parent)
 {
     //激活键盘鼠标事件
@@ -77,6 +122,10 @@ void MyOpenglWidget::setWireFrame(bool wireFrame)
     update();
 
 }
+QVector3D lightPos(1.2f, 1.0f, 2.0f);
+QVector3D objectPos(-1.7f, 3.0f, -7.5f);
+QVector3D objectScale(5.0f, 5.0f, 5.0f);
+
 
 void MyOpenglWidget::initializeGL()
 {
@@ -91,49 +140,53 @@ void MyOpenglWidget::initializeGL()
     //开启深度
     glEnable(GL_DEPTH_TEST);
 
-
+    qDebug()<<"11111111111";
     textureWall=new QOpenGLTexture(QImage(":/iamge/wall.jpg").mirrored());
     textureSmile=new QOpenGLTexture(QImage(":/iamge/awesomeface.png").mirrored());
 
     m_shape=Rect;
-    ActorNum=cubePositions.size();
+          Actor*  actorLight=new Actor(this,":/shaders/object.vs",":/shaders/object.fs",":/iamge/wall.jpg");
+          actorLight->InitModel(QVector3D(10,10,10),lightPos,0,QVector3D(0,0,1));
+          ActorVector.push_back(actorLight);
 
-    foreach(auto item,cubePositions)
-    {
-        Actor* actorTemp;
-        if(ActorVector.size()==5)
-        {
-            actorTemp=new Actor(this,":/shaders/light.vs",":/shaders/light.fs",":/iamge/wall.jpg");
-        }
-        else
-        {
-            actorTemp=new Actor(this,":/shaders/object.vs",":/shaders/object.fs",":/iamge/wall.jpg");
-        }
-        actorTemp->UpdateModel(1,item.x(),item.y(),item.z(),0,QVector3D(0,0,1));
-        ActorVector.push_back(actorTemp);
-        glGenVertexArrays(1, &actorTemp->glData.VAO);
-        glGenBuffers(1, &actorTemp->glData.VBO);
 
-        glBindVertexArray(actorTemp->glData.VAO);
-        glBindBuffer(GL_ARRAY_BUFFER, actorTemp->glData.VBO);
+          Actor* actorObject=new Actor(this,":/shaders/object.vs",":/shaders/object.fs",":/iamge/wall.jpg");
+          actorObject->InitModel(objectScale,objectPos,0,QVector3D(0,0,1));
+          ActorVector.push_back(actorObject);
 
-        //glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-        glBufferData(GL_ARRAY_BUFFER,sizeof(Data::verticesAndTexCoords) ,Data::verticesAndTexCoords, GL_STATIC_DRAW);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-        glEnableVertexAttribArray(0);
+          ActorNum=ActorVector.size();
+          for(int i=0;i<ActorNum;++i)
+          {
+              glGenVertexArrays(1, &ActorVector[i]->glData.VAO);
+              glGenBuffers(1, &ActorVector[i]->glData.VBO);
 
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-        //glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)3);
-        glEnableVertexAttribArray(1);
+              glBindVertexArray(ActorVector[i]->glData.VAO);
+              glBindBuffer(GL_ARRAY_BUFFER, ActorVector[i]->glData.VBO);
 
-        glBindVertexArray(0);
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
+              //glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+              glBufferData(GL_ARRAY_BUFFER,sizeof(vertices_N) ,vertices_N, GL_STATIC_DRAW);
+              glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+              glEnableVertexAttribArray(0);
 
-        actorTemp->m_shader.bind();
-        actorTemp->m_shader.setUniformValue("ratio",ratio);
-        actorTemp->m_shader.setUniformValue("objectColor",1.0f, 0.5f, 0.31f);
-        actorTemp->m_shader.setUniformValue("lightColor",1.0f, 1.0f, 1.0f);
-    }
+              glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+              //glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)3);
+              glEnableVertexAttribArray(1);
+
+              glBindVertexArray(0);
+              glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+              ActorVector[i]->m_shader.bind();
+              if(i!=0)
+              {
+                  ActorVector[i]->m_shader.setUniformValue("ratio",ratio);
+                  ActorVector[i]->m_shader.setUniformValue("objectColor",1.0f, 0.5f, 0.31f);
+                  ActorVector[i]->m_shader.setUniformValue("lightColor",1.0f, 1.0f, 1.0f);
+                  ActorVector[i]->m_shader.setUniformValue("lithtPos",ActorVector[0]->Position);
+              }
+
+          }
+
+
 }
 
 void MyOpenglWidget::resizeGL(int w, int h)
@@ -159,8 +212,19 @@ void MyOpenglWidget::paintGL()
         int temp=1 <<i;
         if(keyboard &temp)
         {
-           // qDebug()<<i;
+            if(i<6)
             m_camera.ProcessKeyboard((Camera_Movement)i,deltaTime);
+            else if(i==6)
+            {
+                ratio+=0.5*deltaTime;
+                ratio=ratio>1?1:ratio;
+            }
+            else if(i==7)
+            {
+                ratio-=0.5*deltaTime;
+                ratio=ratio<0?0:ratio;
+            }
+            qDebug()<<ratio;
         }
 
     }
@@ -171,30 +235,22 @@ void MyOpenglWidget::paintGL()
     view=m_camera.GetViewMatrix();
     projection.perspective(m_camera.Zoom,(float)width()/height(),0.1,1000);
 
-    glClearColor(0.2f,0.3f,0.3f,1.0f);
+    glClearColor(0.0f,0.0f,0.0f,0.0f);
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
     //int ActorNum=ActorVector.size();
-    float borderColor[]={0.2f,0.3f,0.3f,1.0f};
+    //float borderColor[]={0.2f,0.3f,0.3f,1.0f};
 
     switch (m_shape) {
     case Rect:
         for(int i=0;i<ActorNum;++i)
         {
-
-            ActorVector[i]->BindTexture();
-            ActorVector[i]->m_shader.bind();
             ActorVector[i]->m_shader.setUniformValue("view",view);
-
             ActorVector[i]->m_shader.setUniformValue("projection",projection);
+            if(i!=0)
+            {
+                ActorVector[i]->m_shader.setUniformValue("viewPos",m_camera.Position);
+            }
 
-            glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP_TO_BORDER);
-            glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP_TO_BORDER);
-            glTexParameterfv(GL_TEXTURE_2D,GL_TEXTURE_BORDER_COLOR,borderColor);
-
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-            //ActorVector[i]->DrawActor();
             glBindVertexArray(ActorVector[i]->glData.VAO);
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
@@ -209,12 +265,12 @@ void MyOpenglWidget::keyPressEvent(QKeyEvent *event)
     switch(event->key())
     {
     case Qt::Key_Up:
-    ratio+=0.1;
-    ratio=ratio>1?1:ratio;
+
+    keyboard|= 1<<6;
     break;
     case Qt::Key_Down:
-    ratio-=0.1;
-    ratio=ratio<0?0:ratio;
+    keyboard|= 1<<7;
+
     break;
 
     case Qt::Key_W:
@@ -247,6 +303,18 @@ void MyOpenglWidget::keyReleaseEvent(QKeyEvent *event)
     int Temp;
     switch(event->key())
     {
+    case Qt::Key_Up:
+        Temp=1<<6;
+        Temp = ~Temp;
+        keyboard &=Temp;
+    break;
+    case Qt::Key_Down:
+        Temp=1<<7;
+        Temp = ~Temp;
+        keyboard &=Temp;
+    break;
+
+
     case Qt::Key_W:
         Temp=1<<2;
         Temp = ~Temp;
@@ -267,7 +335,6 @@ void MyOpenglWidget::keyReleaseEvent(QKeyEvent *event)
         Temp = ~Temp;
         keyboard &=Temp;
         break;
-
     }
 
     update();
@@ -292,13 +359,11 @@ void MyOpenglWidget::mouseReleaseEvent(QMouseEvent *event)
     if(event->button()==Qt::LeftButton)
     {
         Temp=~1;
-        //Temp = ~Temp;
         keyboard &=Temp;
     }
     else if(event->button()==Qt::RightButton)
     {
         Temp=~(1<<1);
-        //Temp = ~Temp;
         keyboard &=Temp;
     }
     isMousePressed=false;
@@ -315,7 +380,6 @@ void MyOpenglWidget::mouseMoveEvent(QMouseEvent *event)
     auto currentPos=event->pos();
     deltaPos=currentPos-lastPos;
     lastPos=currentPos;
-    qDebug()<<"鼠标在移动";
     if(isCanUseMouseMove)
     {
         m_camera.ProcessMouseMovement(deltaPos.x(),-deltaPos.y());

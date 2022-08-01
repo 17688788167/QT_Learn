@@ -40,10 +40,18 @@ QOpenGLTexture * m_texture2;
 MyOpenglWidget * m_openGLWidget;
 
 Scene * scene;
+QVector3D Position;
+QVector3D Scale;
+QVector3D Axis;
+float Angle;
 
 QMatrix4x4 model;
 
-void UpdateModel(float Scale, float xOffset, float yOffset,float zOffset,float angle,const QVector3D& axis);
+void InitModel(const QVector3D& Scale,const QVector3D& Position,float angle,const QVector3D& axis);
+
+void AddActorLocation(const QVector3D& LocOffset);
+
+void UpdateModel();
 };
 
 #endif // ACTOR_H

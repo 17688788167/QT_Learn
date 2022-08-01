@@ -80,7 +80,7 @@ void Actor::GenModelVerticesData(float Scale, float xOffset, float yOffset,float
                 if (i % 5 == 0)
                 {
                     ModelVertices[i] += xOffset;
-                    cout<<endl;
+                    //cout<<endl;
                    // cout<<ModelVertices[i]<<" ";
 
                 }
@@ -118,16 +118,33 @@ void Actor::BindTexture()
     m_texture1->bind(1);
     m_texture2->bind(2);
 
-    model.rotate(1,0,0,1);
-    m_shader.setUniformValue("model",model);
     m_openGLWidget->update();
 
 }
 
-void Actor::UpdateModel(float Scale, float xOffset, float yOffset, float zOffset,float angle,const QVector3D& axis)
+void Actor::InitModel(const QVector3D& Scale,const QVector3D& Position,float angle,const QVector3D& axis)
 {
-    model.translate(xOffset,yOffset,zOffset);
-    model.rotate(angle,axis);
-    model.scale(Scale);
+    this->Position=Position;
+    this->Scale=Scale;
+    this->Angle=angle;
+    this->Axis=axis;
+    UpdateModel();
+}
 
+void Actor::AddActorLocation(const QVector3D &LocOffset)
+{
+     Position+=LocOffset;
+     model.translate(LocOffset);
+     m_shader.setUniformValue("model",model);
+     UpdateModel();
+}
+
+void Actor::UpdateModel()
+{
+    model.setToIdentity();
+    model.translate(Position);
+    model.rotate(Angle,Axis);
+    model.scale(Scale);
+    m_shader.setUniformValue("model",model);
+    m_openGLWidget->update();
 }
