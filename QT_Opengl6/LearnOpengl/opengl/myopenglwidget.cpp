@@ -125,7 +125,7 @@ void MyOpenglWidget::setWireFrame(bool wireFrame)
 QVector3D lightPos(1.2f, 1.0f, 2.0f);
 QVector3D objectPos(-1.7f, 3.0f, -7.5f);
 QVector3D objectScale(5.0f, 5.0f, 5.0f);
-
+QVector3D lightColor(1.0f, 1.0f, 1.0f);
 
 void MyOpenglWidget::initializeGL()
 {
@@ -140,17 +140,18 @@ void MyOpenglWidget::initializeGL()
     //开启深度
     glEnable(GL_DEPTH_TEST);
 
-    qDebug()<<"11111111111";
     textureWall=new QOpenGLTexture(QImage(":/iamge/wall.jpg").mirrored());
     textureSmile=new QOpenGLTexture(QImage(":/iamge/awesomeface.png").mirrored());
 
+    qDebug()<<"11111111111";
     m_shape=Rect;
-          Actor*  actorLight=new Actor(this,":/shaders/object.vs",":/shaders/object.fs",":/iamge/wall.jpg");
-          actorLight->InitModel(QVector3D(10,10,10),lightPos,0,QVector3D(0,0,1));
+        Actor*  actorLight=new Actor(this,":/shader/light.vert",":/shader/light.frag",":/iamge/wall.jpg");
+          //Actor*  actorLight=new Actor(this,":/shaders/light.vs",":/shaders/light.fs",":/iamge/wall.jpg");
+          actorLight->InitModel(QVector3D(1,1,1),lightPos,0,QVector3D(0,0,1));
           ActorVector.push_back(actorLight);
 
-
-          Actor* actorObject=new Actor(this,":/shaders/object.vs",":/shaders/object.fs",":/iamge/wall.jpg");
+        Actor* actorObject=new Actor(this,":/shader/object.vert",":/shader/object.frag",":/iamge/wall.jpg");
+          //Actor* actorObject=new Actor(this,":/shaders/objecttest.vert",":/shaders/objecttest.frag",":/iamge/wall.jpg");
           actorObject->InitModel(objectScale,objectPos,0,QVector3D(0,0,1));
           ActorVector.push_back(actorObject);
 
@@ -174,16 +175,6 @@ void MyOpenglWidget::initializeGL()
 
               glBindVertexArray(0);
               glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-              ActorVector[i]->m_shader.bind();
-              if(i!=0)
-              {
-                  ActorVector[i]->m_shader.setUniformValue("ratio",ratio);
-                  ActorVector[i]->m_shader.setUniformValue("objectColor",1.0f, 0.5f, 0.31f);
-                  ActorVector[i]->m_shader.setUniformValue("lightColor",1.0f, 1.0f, 1.0f);
-                  ActorVector[i]->m_shader.setUniformValue("lithtPos",ActorVector[0]->Position);
-              }
-
           }
 
 
@@ -218,13 +209,15 @@ void MyOpenglWidget::paintGL()
             {
                 ratio+=0.5*deltaTime;
                 ratio=ratio>1?1:ratio;
+                ActorVector[0]->AddActorLocation(deltaTime*2*QVector3D(1,1,0));
             }
             else if(i==7)
             {
                 ratio-=0.5*deltaTime;
                 ratio=ratio<0?0:ratio;
+                ActorVector[0]->AddActorLocation(-deltaTime*2*QVector3D(1,1,0));
             }
-            qDebug()<<ratio;
+            //qDebug()<<ratio;
         }
 
     }
@@ -235,20 +228,42 @@ void MyOpenglWidget::paintGL()
     view=m_camera.GetViewMatrix();
     projection.perspective(m_camera.Zoom,(float)width()/height(),0.1,1000);
 
-    glClearColor(0.0f,0.0f,0.0f,0.0f);
+    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-    //int ActorNum=ActorVector.size();
-    //float borderColor[]={0.2f,0.3f,0.3f,1.0f};
+
 
     switch (m_shape) {
     case Rect:
+
+        lightColor.setX(sin(CurrentTime * 2.0f));
+        lightColor.setY(sin(CurrentTime * 0.7f));
+        lightColor.setZ(sin(CurrentTime * 1.3f));
+
+        qDebug()<<CurrentTime;
         for(int i=0;i<ActorNum;++i)
         {
+            ActorVector[i]->m_shader.bind();
             ActorVector[i]->m_shader.setUniformValue("view",view);
             ActorVector[i]->m_shader.setUniformValue("projection",projection);
+
             if(i!=0)
             {
-                ActorVector[i]->m_shader.setUniformValue("viewPos",m_camera.Position);
+                ActorVector[i]->m_shader.setUniformValue("light.position",ActorVector[0]->Position);
+                ActorVector[i]->m_shader.setUniformValue("light.ambient",lightColor *QVector3D(0.2,0.2,0.2));
+                ActorVector[i]->m_shader.setUniformValue("light.diffuse",lightColor *QVector3D(0.5,0.5,0.5));
+                ActorVector[i]->m_shader.setUniformValue("light.specular",1.0f, 1.0f, 1.0f);
+
+                ActorVector[i]->m_shader.setUniformValue("material.ambient",  1.0f, 0.5f, 0.31f);
+                ActorVector[i]->m_shader.setUniformValue("material.diffuse",  1.0f, 0.5f, 0.31f);
+                ActorVector[i]->m_shader.setUniformValue("material.specular", 0.5f, 0.5f, 0.5f);
+                ActorVector[i]->m_shader.setUniformValue("material.shininess", 32.0f);
+
+                ActorVector[i]->m_shader.setUniformValue("viewPos",lightColor);
+            }
+            else
+            {
+
+                ActorVector[i]->m_shader.setUniformValue("lightColor",lightColor);
             }
 
             glBindVertexArray(ActorVector[i]->glData.VAO);

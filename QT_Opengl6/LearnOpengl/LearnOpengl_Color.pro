@@ -44,5 +44,6 @@ FORMS += \
         mainwindow.ui
 
 RESOURCES += \
-    shader/res.qrc \
-    images/image.qrc
+    images/image.qrc \
+    shader/shaders.qrc
+

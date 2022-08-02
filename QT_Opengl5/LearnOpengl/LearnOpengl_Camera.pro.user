@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 4.3.1, 2022-08-01T00:29:07. -->
+<!-- Written by QtCreator 4.3.1, 2022-08-02T17:43:19. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
-  <value type="QByteArray">{d77becb5-0000-457c-a8f0-d84be0251337}</value>
+  <value type="QByteArray">{5b5e4160-eb45-4910-8fd0-20841d5ac1e9}</value>
  </data>
  <data>
   <variable>ProjectExplorer.Project.ActiveTarget</variable>
@@ -285,8 +285,8 @@
     <value type="int" key="PE.EnvironmentAspect.Base">2</value>
     <valuelist type="QVariantList" key="PE.EnvironmentAspect.Changes"/>
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.DefaultDisplayName">LearnOpengl_Camera</value>
-    <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName"></value>
-    <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">Qt4ProjectManager.Qt4RunConfiguration:D:/qt/QT_Opengl/QT_Opengl5/LearnOpengl/LearnOpengl_Camera.pro</value>
+    <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">LearnOpengl_Camera2</value>
+    <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">Qt4ProjectManager.Qt4RunConfiguration:E:/Git/QT/QT_Learn/QT_Opengl5/LearnOpengl/LearnOpengl_Camera.pro</value>
     <value type="bool" key="QmakeProjectManager.QmakeRunConfiguration.UseLibrarySearchPath">true</value>
     <value type="QString" key="Qt4ProjectManager.Qt4RunConfiguration.CommandLineArguments"></value>
     <value type="QString" key="Qt4ProjectManager.Qt4RunConfiguration.ProFile">LearnOpengl_Camera.pro</value>

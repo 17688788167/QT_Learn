@@ -36,6 +36,7 @@ Actor::Actor( MyOpenglWidget*openGLWidget,const QString&VertexCodeFile,const QSt
     m_texture=new QOpenGLTexture(QImage(TextureFile).mirrored());
     m_texture1=new QOpenGLTexture(QImage(":/iamge/awesomeface.png").mirrored());
     m_texture2=new QOpenGLTexture(QImage(":/iamge/small.png").mirrored());
+
     m_shader.bind();
     m_shader.setUniformValue("m_Texture",0);
     m_shader.setUniformValue("m_Texture1",1);
@@ -133,9 +134,8 @@ void Actor::InitModel(const QVector3D& Scale,const QVector3D& Position,float ang
 
 void Actor::AddActorLocation(const QVector3D &LocOffset)
 {
-     Position+=LocOffset;
+     this->Position+=LocOffset;
      model.translate(LocOffset);
-     m_shader.setUniformValue("model",model);
      UpdateModel();
 }
 
@@ -145,6 +145,7 @@ void Actor::UpdateModel()
     model.translate(Position);
     model.rotate(Angle,Axis);
     model.scale(Scale);
+    m_shader.bind();
     m_shader.setUniformValue("model",model);
     m_openGLWidget->update();
 }
