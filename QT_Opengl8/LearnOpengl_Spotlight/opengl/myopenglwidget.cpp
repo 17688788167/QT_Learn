@@ -2,6 +2,7 @@
 
 #include "QDebug"
 #include <QVector3D>
+#include <QtMath>
 
 const QVector<QVector3D> cubePositions= {
 QVector3D( 0.0f, 0.0f, 0.0f),
@@ -127,6 +128,8 @@ QVector3D lightPos(1.2f, 1.0f, 2.0f);
 QVector3D objectPos(-1.7f, 3.0f, -7.5f);
 QVector3D objectScale(5.0f, 5.0f, 5.0f);
 QVector3D lightColor(1.0f, 1.0f, 1.0f);
+QVector3D lightDirection(1.0f, 1.0f, 1.0f);
+const float PI=3.1415926;
 
 void MyOpenglWidget::initializeGL()
 {
@@ -148,13 +151,22 @@ void MyOpenglWidget::initializeGL()
     m_shape=Rect;
         Actor*  actorLight=new Actor(this,":/shader/light.vert",":/shader/light.frag");
           //Actor*  actorLight=new Actor(this,":/shaders/light.vs",":/shaders/light.fs",":/iamge/wall.jpg");
-          actorLight->InitModel(QVector3D(1,1,1),lightPos,0,QVector3D(0,0,1));
+          actorLight->InitModel(QVector3D(-0.2f,-1.0f,-0.3f),lightPos,0,QVector3D(0,0,1));
           ActorVector.push_back(actorLight);
 
-        Actor* actorObject=new Actor(this,":/shader/object.vert",":/shader/object.frag");
+       // Actor* actorObject=new Actor(this,":/shader/object.vert",":/shader/object.frag");
           //Actor* actorObject=new Actor(this,":/shaders/objecttest.vert",":/shaders/objecttest.frag");
-          actorObject->InitModel(objectScale,objectPos,0,QVector3D(0,0,1));
-          ActorVector.push_back(actorObject);
+         // actorObject->InitModel(objectScale,objectPos,0,QVector3D(0,0,1));
+         // ActorVector.push_back(actorObject);
+
+          int objNum=cubePositions.size();
+          for(int i=0;i<objNum;++i)
+          {
+              Actor *actorTemp=new Actor(this,":/shader/object.vert",":/shader/object.frag");
+              actorTemp->InitModel(QVector3D(1,1,1),cubePositions[i],20.0*i,QVector3D(1.0f,0.3f,0.5f));
+              ActorVector.push_back(actorTemp);
+
+          }
 
           ActorNum=ActorVector.size();
           for(int i=0;i<ActorNum;++i)
@@ -224,13 +236,13 @@ void MyOpenglWidget::paintGL()
             {
                 ratio+=0.5*deltaTime;
                 ratio=ratio>1?1:ratio;
-                ActorVector[0]->AddActorLocation(deltaTime*2*QVector3D(1,1,0));
+                ActorVector[0]->AddActorLocation(deltaTime*2*QVector3D(0,0,1));
             }
             else if(i==7)
             {
                 ratio-=0.5*deltaTime;
                 ratio=ratio<0?0:ratio;
-                ActorVector[0]->AddActorLocation(-deltaTime*2*QVector3D(1,1,0));
+                ActorVector[0]->AddActorLocation(-deltaTime*2*QVector3D(0,0,1));
             }
             //qDebug()<<ratio;
         }
@@ -243,16 +255,16 @@ void MyOpenglWidget::paintGL()
     view=m_camera.GetViewMatrix();
     projection.perspective(m_camera.Zoom,(float)width()/height(),0.1,1000);
 
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
 
     switch (m_shape) {
     case Rect:
 
-//        lightColor.setX(sin(CurrentTime * 2.0f));
-//        lightColor.setY(sin(CurrentTime * 0.7f));
-//        lightColor.setZ(sin(CurrentTime * 1.3f));
+        //lightDirection.setX(sin(CurrentTime * 2.0f));
+        //lightDirection.setY(sin(CurrentTime * 0.7f));
+        //lightDirection.setZ(sin(CurrentTime * 1.3f));
 
         //qDebug()<<CurrentTime;
         for(int i=0;i<ActorNum;++i)
@@ -263,11 +275,17 @@ void MyOpenglWidget::paintGL()
 
             if(i!=0)
             {
-                ActorVector[i]->Rotate();
-                ActorVector[i]->m_shader.setUniformValue("light.position",ActorVector[0]->Position);
+                //ActorVector[i]->Rotate();
+                ActorVector[i]->m_shader.setUniformValue("light.position",m_camera.Position);
+                ActorVector[i]->m_shader.setUniformValue("light.direction",m_camera.Front);
+                ActorVector[i]->m_shader.setUniformValue("light.cutOff",(float)cos(17.5f*PI/180));
+                ActorVector[i]->m_shader.setUniformValue("light.cutOn",(float)cos(12.5f*PI/180));
                 ActorVector[i]->m_shader.setUniformValue("light.ambient",lightColor *QVector3D(0.2,0.2,0.2));
                 ActorVector[i]->m_shader.setUniformValue("light.diffuse",lightColor *QVector3D(0.5,0.5,0.5));
                 ActorVector[i]->m_shader.setUniformValue("light.specular",1.0f, 1.0f, 1.0f);
+                ActorVector[i]->m_shader.setUniformValue("light.constant",1.0f);
+                ActorVector[i]->m_shader.setUniformValue("light.linear",0.09f);
+                ActorVector[i]->m_shader.setUniformValue("light.quadratic",0.032f);
 
                 ActorVector[i]->m_shader.setUniformValue("material.ambient",  1.0f, 0.5f, 0.31f);
                 ActorVector[i]->m_shader.setUniformValue("material.diffuse",  1.0f, 0.5f, 0.31f);

@@ -1,0 +1,12 @@
+<RCC>
+    <qresource prefix="/iamge">
+        <file>awesomeface.png</file>
+        <file>small.png</file>
+        <file>wall.jpg</file>
+        <file>container2.png</file>
+        <file>container2_specular.png</file>
+        <file>image.qrc</file>
+        <file>lighting_maps_specular_color.png</file>
+        <file>matrix.jpg</file>
+    </qresource>
+</RCC>

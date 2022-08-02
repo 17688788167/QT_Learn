@@ -15,10 +15,18 @@ uniform Material material;
 struct Light
 {
     vec3 position;
+    vec3 direction;
+
+    float cutOff;
+    float cutOn;
 
     vec3 ambient;
     vec3 diffuse;
     vec3 specular;
+
+    float constant;
+    float linear;
+    float quadratic;
 };
 uniform Light light;
 
@@ -43,22 +51,41 @@ void main()
     vec3 specularTexColor=vec3(texture(material.specular,TexCoords));
     vec3 emissionTexColor=vec3(texture(material.emission,TexCoords));
 
+
+    //点光源会根据距离进行衰减，衰减的值用一个二次方程表示，并让环境光，漫反射光，镜面反射光都*=衰减因子
+    float distance=length(light.position-FragPos);
+    float attenuation=1.0/(light.constant+light.linear*distance+light.quadratic*distance*distance);
 //环境光照ambient
     vec3 ambient=light.ambient*diffuseTexColor;
-
+    ambient*=attenuation;
 //漫反射光照Diffuse,
+
     vec3 norm=normalize(Normal);
-    vec3 lithtDir=normalize(light.position-FragPos);
-    float diff = max(dot(norm,lithtDir),0.0);
+    vec3 lightDir=normalize(light.position-FragPos);
+    //vec3 lightDir=normalize(-light.direction);
+    float diff = max(dot(norm,lightDir),0.0);
+
+
+
     vec3 diffuse=light.diffuse*diff*diffuseTexColor;
+    diffuse*=attenuation;
+
+
 
 //镜面光照Specular
     vec3 viewDir=normalize(viewPos-FragPos);
-    vec3 reflectDir=reflect(-lithtDir,norm);
+    vec3 reflectDir=reflect(-lightDir,norm);
     float spec=pow(max(dot(viewDir,reflectDir),0),material.shininess);
     vec3 specular=light.specular*spec*specularTexColor;
-
+    specular*=attenuation;
 //求和
-    vec3 result=(ambient+diffuse+specular)+emissionTexColor;
+     float theta=dot(lightDir,normalize(-light.direction));
+    float alpha=smoothstep(light.cutOff,light.cutOn ,theta);
+
+
+         diffuse*=alpha;
+         specular*=alpha;
+
+    vec3 result=(ambient+diffuse+specular);
     FragColor = vec4(result, 1.0);
 }
