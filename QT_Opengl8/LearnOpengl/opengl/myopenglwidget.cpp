@@ -61,6 +61,22 @@ float vertices[] = {
     -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f
 };
 
+QVector3D pointLightPositions[] = {
+    QVector3D( 0.7f, 0.2f, 2.0f),
+    QVector3D( 2.3f, -3.3f, -4.0f),
+    QVector3D(-4.0f, 2.0f, -12.0f),
+    QVector3D( 0.0f, 0.0f, -3.0f)
+};
+
+QVector3D pointLightColors[] = {
+    QVector3D(1.0f, 1.0f, 0.0f),
+    QVector3D(0.3f, 0.3f, 0.7f),
+    QVector3D(0.0f, 0.0f, 0.3f),
+    QVector3D(0.4f, 0.4f, 0.4f)
+};
+
+
+
 MyOpenglWidget::MyOpenglWidget(QWidget *parent) : QOpenGLWidget(parent)
 {
     //激活键盘鼠标事件
@@ -146,16 +162,12 @@ void MyOpenglWidget::initializeGL()
     textureSmile=new QOpenGLTexture(QImage(":/iamge/awesomeface.png").mirrored());
 
     qDebug()<<"11111111111";
-    m_shape=Rect;
-        Actor*  actorLight=new Actor(this,":/shader/light.vert",":/shader/light.frag");
+             m_shape=Rect;
+           Actor*  actorLight=new Actor(this,":/shader/light.vert",":/shader/light.frag");
           //Actor*  actorLight=new Actor(this,":/shaders/light.vs",":/shaders/light.fs",":/iamge/wall.jpg");
           actorLight->InitModel(QVector3D(-0.2f,-1.0f,-0.3f),lightPos,0,QVector3D(0,0,1));
           ActorVector.push_back(actorLight);
 
-       // Actor* actorObject=new Actor(this,":/shader/object.vert",":/shader/object.frag");
-          //Actor* actorObject=new Actor(this,":/shaders/objecttest.vert",":/shaders/objecttest.frag");
-         // actorObject->InitModel(objectScale,objectPos,0,QVector3D(0,0,1));
-         // ActorVector.push_back(actorObject);
 
           int objNum=cubePositions.size();
           for(int i=0;i<objNum;++i)
