@@ -6,7 +6,7 @@ void Scene::SetWorldLocation(const QVector3D &NewLoc)
 
 }
 
-void Scene::SetWorldRotation(const QQuaternion &NewRot)
+void Scene::SetWorldRotation(const  glm::quat &NewRot)
 {
     this->m_rotation=NewRot;
 }
@@ -23,7 +23,7 @@ QMatrix4x4 Scene::UpdateModelMat() const
 
 
         trans.translate(m_position);
-        trans.rotate(m_rotation);
+        //trans.rotate(m_rotation);
         trans.scale(m_scale);
         return trans;
     }
