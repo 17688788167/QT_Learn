@@ -12,6 +12,8 @@
 #include "camera.h"
 #include <QPoint>
 #include <QMouseEvent>
+#include "environmentsettingdialog.h"
+
 
 class MyOpenglWidget : public QOpenGLWidget,QOpenGLFunctions_3_3_Core
 {
@@ -23,6 +25,16 @@ public:
     void drawShape(EShape shape);
     void setWireFrame(bool wireFrame);
 
+
+
+    void SetEnvironmentType(EnvironmentSettingDialog::EnvironmentType type);
+    EnvironmentSettingDialog::EnvironmentType m_type;
+    void setType(const EnvironmentSettingDialog::EnvironmentType & type);
+
+    EnvironmentSettingDialog::EnvironmentType getType()const
+    {
+        return m_type;
+    }
 
     //QVector<FGLData*> GLDataVector;
 
@@ -38,6 +50,14 @@ public:
     QPoint lastPos;
     bool isCanUseMouseMove=false;
     int8_t keyboard=0;
+
+
+    QVector3D ClearColor;
+    QVector3D DirLight_ambient;
+    QVector3D DirLight_diffuse;
+    QVector3D DirLight_dspecular;
+
+
 protected:
     virtual void initializeGL();
     virtual void resizeGL(int w, int h);

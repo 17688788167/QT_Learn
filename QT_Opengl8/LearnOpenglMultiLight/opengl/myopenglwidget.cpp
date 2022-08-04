@@ -69,13 +69,41 @@ QVector3D pointLightPositions[] = {
     QVector3D( 0.0f, 0.0f, -3.0f)
 };
 
-QVector3D pointLightColors[] = {
-    QVector3D(1.0f, 1.0f, 0.0f),
-    QVector3D(0.3f, 1.0f, 0.7f),
+
+//QVector3D pointLightColors[] = {
+//    QVector3D(1.0f, 1.0f, 0.0f),
+//    QVector3D(0.3f, 1.0f, 0.7f),
+//    QVector3D(0.0f, 0.0f, 0.3f),
+//    QVector3D(0.4f, 0.4f, 0.4f)
+//};
+
+QVector3D pointLightColorsDesert[] = {
+    QVector3D(1.0f, 0.6f, 0.0f),
+    QVector3D(1.0f, 0.0f, 0.0f),
+    QVector3D(1.0f, 1.0, 0.0),
+    QVector3D(0.2f, 0.2f, 1.0f)
+};
+
+QVector3D pointLightColorsFactory[] = {
+    QVector3D(0.2f, 0.2f, 0.6f),
+    QVector3D(0.3f, 0.3f, 0.7f),
     QVector3D(0.0f, 0.0f, 0.3f),
     QVector3D(0.4f, 0.4f, 0.4f)
 };
 
+QVector3D pointLightColorsHorror[] = {
+    QVector3D(0.1f, 0.1f, 0.1f),
+    QVector3D(0.1f, 0.1f, 0.1f),
+    QVector3D(0.1f, 0.1f, 0.1f),
+    QVector3D(0.3f, 0.1f, 0.1f)
+};
+
+QVector3D pointLightColorsBiochemicalLab[] = {
+    QVector3D(1.0f, 0.6f, 0.0f),
+    QVector3D(1.0f, 0.0f, 0.0f),
+    QVector3D(1.0f, 1.0, 0.0),
+    QVector3D(0.2f, 0.2f, 1.0f) }
+;
 
 
 MyOpenglWidget::MyOpenglWidget(QWidget *parent) : QOpenGLWidget(parent)
@@ -85,6 +113,7 @@ MyOpenglWidget::MyOpenglWidget(QWidget *parent) : QOpenGLWidget(parent)
 
     setMouseTracking(true);
 
+    SetEnvironmentType(EnvironmentSettingDialog::EnvironmentType::BIOCHEMICALLAB);
     connect(&timer,SIGNAL(timeout()),this,SLOT(on_timeout()));
     timer.start(10);
 }
@@ -140,6 +169,54 @@ void MyOpenglWidget::setWireFrame(bool wireFrame)
     update();
 
 }
+QVector3D* pointLightColor;
+void MyOpenglWidget::SetEnvironmentType(EnvironmentSettingDialog::EnvironmentType type)
+{
+    m_type=type;
+
+    switch (type) {
+    case EnvironmentSettingDialog::EnvironmentType::DESERT:
+        pointLightColor=pointLightColorsDesert;
+        ClearColor=QVector3D(0.75f, 0.52f, 0.3f);
+        DirLight_ambient=QVector3D(0.3f, 0.24f, 0.14f);
+        DirLight_diffuse=QVector3D(0.7f, 0.42f, 0.26f);
+        DirLight_dspecular=QVector3D(0.5f, 0.5f, 0.5f);
+        break;
+
+    case EnvironmentSettingDialog::EnvironmentType::FACTORY:
+        pointLightColor=pointLightColorsFactory;
+        ClearColor=QVector3D(0.0f, 0.0f, 0.0f);
+        DirLight_ambient=QVector3D(0.05f, 0.05f, 0.1f);
+        DirLight_diffuse=QVector3D(0.2f, 0.2f, 0.7f);
+        DirLight_dspecular=QVector3D(0.7f, 0.7f, 0.7f);
+
+        break;
+    case EnvironmentSettingDialog::EnvironmentType::BIOCHEMICALLAB:
+        pointLightColor=pointLightColorsBiochemicalLab;
+        ClearColor=QVector3D(0.0f, 0.0f, 0.0f);
+        DirLight_ambient=QVector3D(0.0f, 0.0f, 0.0f);
+        DirLight_diffuse=QVector3D(0.05f, 0.05f, 0.05);
+        DirLight_dspecular=QVector3D(0.2f, 0.2f, 0.2f);
+
+        break;
+    case EnvironmentSettingDialog::EnvironmentType::HORROR:
+        pointLightColor=pointLightColorsHorror;
+        ClearColor=QVector3D(0.9f, 0.9f, 0.9f);
+        DirLight_ambient=QVector3D(0.5f, 0.5f, 0.5f);
+        DirLight_diffuse=QVector3D(1.0f, 1.0f, 1.0f);
+        DirLight_dspecular=QVector3D(1.0f, 1.0f, 1.0f);
+
+        break;
+
+    default:
+        break;
+    }
+}
+
+void MyOpenglWidget::setType(const EnvironmentSettingDialog::EnvironmentType &type)
+{
+    m_type=type;
+}
 QVector3D lightPos(1.2f, 1.0f, 2.0f);
 QVector3D objectPos(-1.7f, 3.0f, -7.5f);
 QVector3D objectScale(5.0f, 5.0f, 5.0f);
@@ -147,11 +224,20 @@ QVector3D lightColor(1.0f, 1.0f, 1.0f);
 QVector3D lightDirection(1.0f, 1.0f, 1.0f);
 const float PI=3.1415926;
 
+
 void MyOpenglWidget::initializeGL()
 {
     initializeOpenGLFunctions();
     //开始计时
     StartTime.start();
+
+//    ClearColor=QVector3D(0.1f, 0.1f, 0.1f);
+//    DirLight_ambient=QVector3D(0.75,0.52,0.3);
+//    DirLight_diffuse=QVector3D(0.75,0.52,0.3);
+//    DirLight_dspecular=QVector3D(0.75,0.52,0.3);
+
+
+    //pointLightColor =pointLightColorsDesert;
 
     //开启透明度
     //glEnable(GL_BLEND);
@@ -271,7 +357,7 @@ void MyOpenglWidget::paintGL()
     view=m_camera.GetViewMatrix();
     projection.perspective(m_camera.Zoom,(float)width()/height(),0.1,1000);
 
-    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+    glClearColor(ClearColor.x(),ClearColor.y(),ClearColor.z(), 1.0f);
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
 
@@ -306,9 +392,9 @@ void MyOpenglWidget::paintGL()
 
                 //方向光
                 ActorVector[i]->m_shader.setUniformValue("directlight.direction",-0.2f, -1.0f, -0.3f);
-                ActorVector[i]->m_shader.setUniformValue("directlight.ambient",0.05f, 0.05f, 0.05f);
-                ActorVector[i]->m_shader.setUniformValue("directlight.diffuse",0.4f, 0.4f, 0.4f);
-                ActorVector[i]->m_shader.setUniformValue("directlight.specular", 0.5f, 0.5f, 0.5f);
+                ActorVector[i]->m_shader.setUniformValue("directlight.ambient",DirLight_ambient);
+                ActorVector[i]->m_shader.setUniformValue("directlight.diffuse",DirLight_diffuse);
+                ActorVector[i]->m_shader.setUniformValue("directlight.specular", DirLight_dspecular);
 
 
                 //点光源
@@ -316,14 +402,14 @@ void MyOpenglWidget::paintGL()
                 for(int i=0;i<4;++i)
                 {
                     QString iStr="pointlight["+QString::number(i)+"]."+"position";
-                    ActorVector[i]->m_shader.setUniformValue(iStr.toStdString().c_str(),pointLightPositions[i]);
+                    ActorVector[i]->m_shader.setUniformValue(iStr.toStdString().c_str(),pointLightColor[i]);
 
                     iStr="pointlight["+QString::number(i)+"]."+"ambient";
-                    ActorVector[i]->m_shader.setUniformValue(iStr.toStdString().c_str(),pointLightColors[i] *QVector3D(0.2,0.2,0.2));
+                    ActorVector[i]->m_shader.setUniformValue(iStr.toStdString().c_str(),pointLightColor[i] *QVector3D(0.2,0.2,0.2));
                     iStr="pointlight["+QString::number(i)+"]."+"diffuse";
-                    ActorVector[i]->m_shader.setUniformValue(iStr.toStdString().c_str(),pointLightColors[i] *QVector3D(0.5,0.5,0.5));
+                    ActorVector[i]->m_shader.setUniformValue(iStr.toStdString().c_str(),pointLightColor[i] *QVector3D(0.5,0.5,0.5));
                     iStr="pointlight["+QString::number(i)+"]."+"specular";
-                    ActorVector[i]->m_shader.setUniformValue(iStr.toStdString().c_str(),pointLightColors[i]);
+                    ActorVector[i]->m_shader.setUniformValue(iStr.toStdString().c_str(),pointLightColor[i]);
 
                     iStr="pointlight["+QString::number(i)+"]."+"constant";
                     ActorVector[i]->m_shader.setUniformValue(iStr.toStdString().c_str(),1.0f);
@@ -354,7 +440,7 @@ void MyOpenglWidget::paintGL()
             LightVector[i]->m_shader.bind();
             LightVector[i]->m_shader.setUniformValue("view",view);
             LightVector[i]->m_shader.setUniformValue("projection",projection);
-            LightVector[i]->m_shader.setUniformValue("lightColor",pointLightColors[i]);
+            LightVector[i]->m_shader.setUniformValue("lightColor",pointLightColor[i]);
             glBindVertexArray(ActorVector[i]->glData.VAO);
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }

@@ -123,6 +123,7 @@ QWidget:checked{
    <addaction name="actRender"/>
    <addaction name="actClear"/>
    <addaction name="actBoxMode"/>
+   <addaction name="actEnvironmentSetting"/>
   </widget>
   <widget class="QStatusBar" name="statusBar">
    <property name="styleSheet">
@@ -154,6 +155,11 @@ color:rgb(60, 60, 60);
    </property>
    <property name="text">
     <string>线框模式</string>
+   </property>
+  </action>
+  <action name="actEnvironmentSetting">
+   <property name="text">
+    <string>环境设置</string>
    </property>
   </action>
  </widget>

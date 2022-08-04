@@ -31,7 +31,8 @@ SOURCES += \
     opengl/actor.cpp \
     opengl/scene.cpp \
     opengl/camera.cpp \
-    opengl/light.cpp
+    opengl/light.cpp \
+    environmentsettingdialog.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -40,10 +41,12 @@ HEADERS += \
     opengl/scene.h \
     opengl/data.h \
     opengl/camera.h \
-    opengl/light.h
+    opengl/light.h \
+    environmentsettingdialog.h
 
 FORMS += \
-        mainwindow.ui
+        mainwindow.ui \
+    environmentsettingdialog.ui
 
 RESOURCES += \
     images/image.qrc \

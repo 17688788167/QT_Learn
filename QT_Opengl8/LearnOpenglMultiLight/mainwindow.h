@@ -24,6 +24,8 @@ private slots:
 
     void on_actBoxMode_triggered(bool checked);
 
+    void on_actEnvironmentSetting_triggered();
+
 private:
     Ui::MainWindow *ui;
 };

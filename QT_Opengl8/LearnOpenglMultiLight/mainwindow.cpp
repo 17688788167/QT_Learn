@@ -35,3 +35,23 @@ void MainWindow::on_actBoxMode_triggered()
 {
 
 }
+
+void MainWindow::on_actEnvironmentSetting_triggered()
+{
+    EnvironmentSettingDialog *dlg=new EnvironmentSettingDialog(this);
+
+   dlg->setType(ui->openGLWidget->getType());
+
+    if (dlg->exec()==QDialog::Accepted)
+    {
+        ui->openGLWidget->SetEnvironmentType(dlg->getType());
+
+    }
+
+
+       delete dlg;
+
+
+
+
+}
