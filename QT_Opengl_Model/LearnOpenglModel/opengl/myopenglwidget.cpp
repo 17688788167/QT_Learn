@@ -70,13 +70,6 @@ QVector3D pointLightPositions[] = {
 };
 
 
-//QVector3D pointLightColors[] = {
-//    QVector3D(1.0f, 1.0f, 0.0f),
-//    QVector3D(0.3f, 1.0f, 0.7f),
-//    QVector3D(0.0f, 0.0f, 0.3f),
-//    QVector3D(0.4f, 0.4f, 0.4f)
-//};
-
 QVector3D pointLightColorsDesert[] = {
     QVector3D(1.0f, 0.6f, 0.0f),
     QVector3D(1.0f, 0.0f, 0.0f),
@@ -113,7 +106,7 @@ MyOpenglWidget::MyOpenglWidget(QWidget *parent) : QOpenGLWidget(parent)
 
     setMouseTracking(true);
 
-    SetEnvironmentType(EnvironmentSettingDialog::EnvironmentType::BIOCHEMICALLAB);
+    SetEnvironmentType(EnvironmentSettingDialog::EnvironmentType::DESERT);
     connect(&timer,SIGNAL(timeout()),this,SLOT(on_timeout()));
     timer.start(10);
 }
@@ -122,23 +115,32 @@ MyOpenglWidget::~MyOpenglWidget()
 {
 
     makeCurrent();
-    for(int i=0;i<ActorNum;++i)
+    //    for(int i=0;i<ActorNum;++i)
+    //    {
+    //      glDeleteVertexArrays(1,&ActorVector[i]->glData.VAO);
+    //      glDeleteBuffers(1,&ActorVector[i]->glData.VBO);
+    //     // glDeleteShader(ActorVector[i]->m_shader);
+
+    //      delete ActorVector[i];
+    //    }
+    //    ActorVector.empty();
+
+    //    if(m_texture1)
+    //    {
+    //       delete m_texture1;
+    //        m_texture1=nullptr;
+    //    }
+
+    if(m_mesh)
     {
-      glDeleteVertexArrays(1,&ActorVector[i]->glData.VAO);
-      glDeleteBuffers(1,&ActorVector[i]->glData.VBO);
-     // glDeleteShader(ActorVector[i]->m_shader);
-
-      delete ActorVector[i];
+        delete m_mesh;
+        m_mesh=nullptr;
     }
-    ActorVector.empty();
-
-    if(m_texture1)
+    if(m_lightMesh)
     {
-       delete m_texture1;
-        m_texture1=nullptr;
+        delete m_lightMesh;
+        m_lightMesh=nullptr;
     }
-
-
     doneCurrent();
 }
 
@@ -231,13 +233,6 @@ void MyOpenglWidget::initializeGL()
     //开始计时
     StartTime.start();
 
-//    ClearColor=QVector3D(0.1f, 0.1f, 0.1f);
-//    DirLight_ambient=QVector3D(0.75,0.52,0.3);
-//    DirLight_diffuse=QVector3D(0.75,0.52,0.3);
-//    DirLight_dspecular=QVector3D(0.75,0.52,0.3);
-
-
-    //pointLightColor =pointLightColorsDesert;
 
     //开启透明度
     //glEnable(GL_BLEND);
@@ -245,77 +240,36 @@ void MyOpenglWidget::initializeGL()
 
     //开启深度
     glEnable(GL_DEPTH_TEST);
-
-    textureWall=new QOpenGLTexture(QImage(":/iamge/wall.jpg").mirrored());
-    textureSmile=new QOpenGLTexture(QImage(":/iamge/awesomeface.png").mirrored());
-
-    qDebug()<<"11111111111";
     m_shape=Rect;
 
-          for(unsigned int i=0;i< 4;++i)
-          {
-              Actor* Light=new Actor(this,":/shader/light.vert",":/shader/light.frag");
-              Light->InitModel(QVector3D(0.3,0.3,0.3),pointLightPositions[i],0,QVector3D(0,0,1));
-              LightVector.push_back(Light);
 
-              glGenVertexArrays(1, &Light->glData.VAO);
-              glGenBuffers(1, &Light->glData.VBO);
 
-              glBindVertexArray(Light->glData.VAO);
-              glBindBuffer(GL_ARRAY_BUFFER, Light->glData.VBO);
+    bool success;
+    m_ShaderProgram.addShaderFromSourceFile(QOpenGLShader::Vertex,":/shader/object.vert");
+    m_ShaderProgram.addShaderFromSourceFile(QOpenGLShader::Fragment,":/shader/object.frag");
+    success=m_ShaderProgram.link();
+    if(!success) qDebug()<<"ERR:"<<m_ShaderProgram.log();
 
-              glBufferData(GL_ARRAY_BUFFER,sizeof(vertices) ,vertices, GL_STATIC_DRAW);
-              glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-              glEnableVertexAttribArray(0);
+    m_diffuseTex=new QOpenGLTexture(QImage(":/iamge/container2.png").mirrored());
+    m_specularTex=new QOpenGLTexture(QImage(":/iamge/container2_specular.png").mirrored());
+    m_ShaderProgram.bind();
 
-              glBindVertexArray(0);
-              glBindBuffer(GL_ARRAY_BUFFER, 0);
-          }
+    m_LightShaderProgram.addShaderFromSourceFile(QOpenGLShader::Vertex,":/shader/light.vert");
+    m_LightShaderProgram.addShaderFromSourceFile(QOpenGLShader::Fragment,":/shader/light.frag");
+    success=m_LightShaderProgram.link();
+    if(!success) qDebug()<<"ERR:"<<m_LightShaderProgram.log();
 
-          m_diffuseTex=new QOpenGLTexture(QImage(":/iamge/container2.png").mirrored());
-          m_specularTex=new QOpenGLTexture(QImage(":/iamge/container2_specular.png").mirrored());
-          m_emissionTex=new QOpenGLTexture(QImage(":/iamge/matrix.jpg").mirrored());
+    m_mesh=processMesh(EMeshType::Cube);
+    m_lightMesh=processMesh(EMeshType::Light);
 
-          ActorNum=cubePositions.size();
-          for(int i=0;i<ActorNum;++i)
-          {
-              Actor *actorTemp=new Actor(this,":/shader/object.vert",":/shader/object.frag");
-              actorTemp->InitModel(QVector3D(1,1,1),cubePositions[i],20.0*i,QVector3D(1.0f,0.3f,0.5f));
-              ActorVector.push_back(actorTemp);
-
-              glGenVertexArrays(1, &actorTemp->glData.VAO);
-              glGenBuffers(1, &actorTemp->glData.VBO);
-
-              glBindVertexArray(actorTemp->glData.VAO);
-              glBindBuffer(GL_ARRAY_BUFFER, actorTemp->glData.VBO);
-
-              //glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-              glBufferData(GL_ARRAY_BUFFER,sizeof(vertices) ,vertices, GL_STATIC_DRAW);
-              glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-              glEnableVertexAttribArray(0);
-
-              glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-              glEnableVertexAttribArray(1);
-
-              glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-              glEnableVertexAttribArray(2);
-              actorTemp->m_shader.bind();
-              actorTemp->m_shader.setUniformValue("material.diffuse",0);
-              actorTemp->m_shader.setUniformValue("material.specular",1);
-              actorTemp->m_shader.setUniformValue("material.emission",2);
-              actorTemp->m_shader.setUniformValue("material.shininess", 32.0f);
-              glBindVertexArray(0);
-              glBindBuffer(GL_ARRAY_BUFFER, 0);
-          }
 }
 
 void MyOpenglWidget::resizeGL(int w, int h)
 {
     Q_UNUSED(w);
     Q_UNUSED(h);
-    //glViewport(0,0,w,h);
-}
 
+}
 void MyOpenglWidget::paintGL()
 {
 
@@ -323,6 +277,7 @@ void MyOpenglWidget::paintGL()
     deltaTime=CurrentTime-lastTime;
     lastTime=CurrentTime;
 
+    QMatrix4x4 model;
     QMatrix4x4 view;
     QMatrix4x4 projection;
 
@@ -338,21 +293,19 @@ void MyOpenglWidget::paintGL()
             {
                 ratio+=0.5*deltaTime;
                 ratio=ratio>1?1:ratio;
-                ActorVector[0]->AddActorLocation(deltaTime*2*QVector3D(0,0,1));
+                //ActorVector[0]->AddActorLocation(deltaTime*2*QVector3D(0,0,1));
             }
             else if(i==7)
             {
                 ratio-=0.5*deltaTime;
                 ratio=ratio<0?0:ratio;
-                ActorVector[0]->AddActorLocation(-deltaTime*2*QVector3D(0,0,1));
+                //ActorVector[0]->AddActorLocation(-deltaTime*2*QVector3D(0,0,1));
             }
             //qDebug()<<ratio;
         }
 
     }
 
-    //model.rotate(CurrentTime*45,1,1,0);
-    //view.translate(0,0,-3);
 
     view=m_camera.GetViewMatrix();
     projection.perspective(m_camera.Zoom,(float)width()/height(),0.1,1000);
@@ -364,88 +317,178 @@ void MyOpenglWidget::paintGL()
     switch (m_shape) {
     case Rect:
 
-        lightDirection.setX(sin(CurrentTime * 2.0f));
-        lightDirection.setY(sin(CurrentTime * 0.7f));
-        lightDirection.setZ(sin(CurrentTime * 1.3f));
+//        lightDirection.setX(sin(CurrentTime * 2.0f));
+//        lightDirection.setY(sin(CurrentTime * 0.7f));
+//        lightDirection.setZ(sin(CurrentTime * 1.3f));
 
-        //qDebug()<<CurrentTime;
-        for(int i=0;i<ActorNum;++i)
-        {
-            ActorVector[i]->m_shader.bind();
-            ActorVector[i]->m_shader.setUniformValue("view",view);
-            ActorVector[i]->m_shader.setUniformValue("projection",projection);
-
-
-                //聚光灯
-                ActorVector[i]->m_shader.setUniformValue("spotlight.position",m_camera.Position);
-                ActorVector[i]->m_shader.setUniformValue("spotlight.direction",m_camera.Front);
-                ActorVector[i]->m_shader.setUniformValue("spotlight.cutOff",(float)cos(17.5f*PI/180));
-                ActorVector[i]->m_shader.setUniformValue("spotlight.cutOn",(float)cos(12.5f*PI/180));
-
-                ActorVector[i]->m_shader.setUniformValue("spotlight.ambient",lightColor *QVector3D(0.2,0.2,0.2));
-                ActorVector[i]->m_shader.setUniformValue("spotlight.diffuse",lightColor *QVector3D(0.5,0.5,0.5));
-                ActorVector[i]->m_shader.setUniformValue("spotlight.specular",1.0f, 1.0f, 1.0f);
-
-                ActorVector[i]->m_shader.setUniformValue("spotlight.constant",1.0f);
-                ActorVector[i]->m_shader.setUniformValue("spotlight.linear",0.09f);
-                ActorVector[i]->m_shader.setUniformValue("spotlight.quadratic",0.032f);
-
-                //方向光
-                ActorVector[i]->m_shader.setUniformValue("directlight.direction",-0.2f, -1.0f, -0.3f);
-                ActorVector[i]->m_shader.setUniformValue("directlight.ambient",DirLight_ambient);
-                ActorVector[i]->m_shader.setUniformValue("directlight.diffuse",DirLight_diffuse);
-                ActorVector[i]->m_shader.setUniformValue("directlight.specular", DirLight_dspecular);
+//        //qDebug()<<CurrentTime;
+//        for(int i=0;i<ActorNum;++i)
+//        {
+//           m_ShaderProgram.bind();
+//           m_ShaderProgram.setUniformValue("view",view);
+//           m_ShaderProgram.setUniformValue("projection",projection);
 
 
-                //点光源
+//                //聚光灯
+//               m_ShaderProgram.setUniformValue("spotlight.position",m_camera.Position);
+//               m_ShaderProgram.setUniformValue("spotlight.direction",m_camera.Front);
+//               m_ShaderProgram.setUniformValue("spotlight.cutOff",(float)cos(17.5f*PI/180));
+//               m_ShaderProgram.setUniformValue("spotlight.cutOn",(float)cos(12.5f*PI/180));
 
-                for(int i=0;i<4;++i)
-                {
-                    QString iStr="pointlight["+QString::number(i)+"]."+"position";
-                    ActorVector[i]->m_shader.setUniformValue(iStr.toStdString().c_str(),pointLightColor[i]);
+//               m_ShaderProgram.setUniformValue("spotlight.ambient",lightColor *QVector3D(0.2,0.2,0.2));
+//               m_ShaderProgram.setUniformValue("spotlight.diffuse",lightColor *QVector3D(0.5,0.5,0.5));
+//               m_ShaderProgram.setUniformValue("spotlight.specular",1.0f, 1.0f, 1.0f);
 
-                    iStr="pointlight["+QString::number(i)+"]."+"ambient";
-                    ActorVector[i]->m_shader.setUniformValue(iStr.toStdString().c_str(),pointLightColor[i] *QVector3D(0.2,0.2,0.2));
-                    iStr="pointlight["+QString::number(i)+"]."+"diffuse";
-                    ActorVector[i]->m_shader.setUniformValue(iStr.toStdString().c_str(),pointLightColor[i] *QVector3D(0.5,0.5,0.5));
-                    iStr="pointlight["+QString::number(i)+"]."+"specular";
-                    ActorVector[i]->m_shader.setUniformValue(iStr.toStdString().c_str(),pointLightColor[i]);
+//               m_ShaderProgram.setUniformValue("spotlight.constant",1.0f);
+//               m_ShaderProgram.setUniformValue("spotlight.linear",0.09f);
+//               m_ShaderProgram.setUniformValue("spotlight.quadratic",0.032f);
 
-                    iStr="pointlight["+QString::number(i)+"]."+"constant";
-                    ActorVector[i]->m_shader.setUniformValue(iStr.toStdString().c_str(),1.0f);
-                     iStr="pointlight["+QString::number(i)+"]."+"linear";
-                    ActorVector[i]->m_shader.setUniformValue(iStr.toStdString().c_str(),0.09f);
-                     iStr="pointlight["+QString::number(i)+"]."+"quadratic";
-                    ActorVector[i]->m_shader.setUniformValue(iStr.toStdString().c_str(),0.032f);
+//                //方向光
+//               m_ShaderProgram.setUniformValue("directlight.direction",-0.2f, -1.0f, -0.3f);
+//               m_ShaderProgram.setUniformValue("directlight.ambient",DirLight_ambient);
+//               m_ShaderProgram.setUniformValue("directlight.diffuse",DirLight_diffuse);
+//               m_ShaderProgram.setUniformValue("directlight.specular", DirLight_dspecular);
 
 
-                }
+//                //点光源
 
+//                for(int i=0;i<4;++i)
+//                {
+//                    QString iStr="pointlight["+QString::number(i)+"]."+"position";
+                   //m_ShaderProgram.setUniformValue(iStr.toStdString().c_str(),pointLightPositions[i]);
+
+//                    iStr="pointlight["+QString::number(i)+"]."+"ambient";
+//                   m_ShaderProgram.setUniformValue(iStr.toStdString().c_str(),pointLightColor[i] *QVector3D(0.2,0.2,0.2));
+//                    iStr="pointlight["+QString::number(i)+"]."+"diffuse";
+//                   m_ShaderProgram.setUniformValue(iStr.toStdString().c_str(),pointLightColor[i] *QVector3D(0.5,0.5,0.5));
+//                    iStr="pointlight["+QString::number(i)+"]."+"specular";
+//                   m_ShaderProgram.setUniformValue(iStr.toStdString().c_str(),pointLightColor[i]);
+
+//                    iStr="pointlight["+QString::number(i)+"]."+"constant";
+//                   m_ShaderProgram.setUniformValue(iStr.toStdString().c_str(),1.0f);
+//                     iStr="pointlight["+QString::number(i)+"]."+"linear";
+//                   m_ShaderProgram.setUniformValue(iStr.toStdString().c_str(),0.09f);
+//                     iStr="pointlight["+QString::number(i)+"]."+"quadratic";
+//                   m_ShaderProgram.setUniformValue(iStr.toStdString().c_str(),0.032f);
+
+//                }
 
 
 
-                ActorVector[i]->m_shader.setUniformValue("viewPos",m_camera.Position);
+
+//               m_ShaderProgram.setUniformValue("viewPos",m_camera.Position);
 
 
-                m_diffuseTex->bind(0);
-                m_specularTex->bind(1);
-                m_emissionTex->bind(2);                
+//                m_diffuseTex->bind(0);
+//                m_specularTex->bind(1);
+//                m_emissionTex->bind(2);
 
-            glBindVertexArray(ActorVector[i]->glData.VAO);
-            glDrawArrays(GL_TRIANGLES, 0, 36);
-        }
+//            glBindVertexArray(ActorVector[i]->glData.VAO);
+//            glDrawArrays(GL_TRIANGLES, 0, 36);
+//        }
 
-        for(unsigned int i=0;i<4;++i)
-        {
-            LightVector[i]->m_shader.bind();
-            LightVector[i]->m_shader.setUniformValue("view",view);
-            LightVector[i]->m_shader.setUniformValue("projection",projection);
-            LightVector[i]->m_shader.setUniformValue("lightColor",pointLightColor[i]);
-            glBindVertexArray(ActorVector[i]->glData.VAO);
-            glDrawArrays(GL_TRIANGLES, 0, 36);
-        }
-        break;
-    default:
+
+//        m_LightShaderProgram.bind();
+//        m_LightShaderProgram.setUniformValue("projection", projection);
+//        m_LightShaderProgram.setUniformValue("view", view);
+//        model.setToIdentity();
+//        model.translate(lightPos);
+//        model.rotate(1.0, 1.0f, 1.0f, 0.5f);
+//        model.scale(0.2);
+//        m_LightShaderProgram.setUniformValue("model", model);
+//        m_LightShaderProgram.setUniformValue("lightColor",pointLightColor[0]);
+
+//        m_mesh->m_shader.bind();
+//        m_mesh->m_shader.setUniformValue("view",view);
+//        m_mesh->m_shader.setUniformValue("projection",projection);
+//        m_mesh->m_shader.setUniformValue("lightColor",pointLightColor[1]);
+//        m_mesh->m_shader.setUniformValue("model", model);
+            m_ShaderProgram.bind();
+
+         // m_mesh->Draw(m_ShaderProgram,this);
+          m_ShaderProgram.setUniformValue("projection", projection);
+          m_ShaderProgram.setUniformValue("view", view);
+          model.rotate(CurrentTime*10, 1.0f, 1.0f, 0.5f);
+          m_ShaderProgram.setUniformValue("viewPos",m_camera.Position);
+
+          m_ShaderProgram.setUniformValue("light.ambient", 0.4f, 0.4f, 0.4f);
+          m_ShaderProgram.setUniformValue("light.diffuse", 0.9f, 0.9f, 0.9f);
+          m_ShaderProgram.setUniformValue("light.specular", 1.0f, 1.0f, 1.0f);
+
+
+          //方向光
+          m_ShaderProgram.setUniformValue("directlight.direction",-0.2f, -1.0f, -0.3f);
+          m_ShaderProgram.setUniformValue("directlight.ambient",DirLight_ambient);
+          m_ShaderProgram.setUniformValue("directlight.diffuse",DirLight_diffuse);
+          m_ShaderProgram.setUniformValue("directlight.specular", DirLight_dspecular);
+
+                          //聚光灯
+                          m_ShaderProgram.setUniformValue("spotlight.position",m_camera.Position);
+                          m_ShaderProgram.setUniformValue("spotlight.direction",m_camera.Front);
+                          m_ShaderProgram.setUniformValue("spotlight.cutOff",(float)cos(17.5f*PI/180));
+                         m_ShaderProgram.setUniformValue("spotlight.cutOn",(float)cos(12.5f*PI/180));
+
+                         m_ShaderProgram.setUniformValue("spotlight.ambient",lightColor *QVector3D(0.2,0.2,0.2));
+                         m_ShaderProgram.setUniformValue("spotlight.diffuse",lightColor *QVector3D(0.5,0.5,0.5));
+                         m_ShaderProgram.setUniformValue("spotlight.specular",1.0f, 1.0f, 1.0f);
+
+                         m_ShaderProgram.setUniformValue("spotlight.constant",1.0f);
+                         m_ShaderProgram.setUniformValue("spotlight.linear",0.09f);
+                         m_ShaderProgram.setUniformValue("spotlight.quadratic",0.032f);
+
+                          //方向光
+                         m_ShaderProgram.setUniformValue("directlight.direction",-0.2f, -1.0f, -0.3f);
+                         m_ShaderProgram.setUniformValue("directlight.ambient",DirLight_ambient);
+                         m_ShaderProgram.setUniformValue("directlight.diffuse",DirLight_diffuse);
+                         m_ShaderProgram.setUniformValue("directlight.specular", DirLight_dspecular);
+
+                                             QString iStr="pointlight["+QString::number(0)+"]."+"position";
+                                            m_ShaderProgram.setUniformValue(iStr.toStdString().c_str(),lightPos);
+
+                                             iStr="pointlight["+QString::number(0)+"]."+"ambient";
+                                            m_ShaderProgram.setUniformValue(iStr.toStdString().c_str(),pointLightColor[0] *QVector3D(0.2,0.2,0.2));
+                                             iStr="pointlight["+QString::number(0)+"]."+"diffuse";
+                                            m_ShaderProgram.setUniformValue(iStr.toStdString().c_str(),pointLightColor[0] *QVector3D(0.5,0.5,0.5));
+                                             iStr="pointlight["+QString::number(0)+"]."+"specular";
+                                            m_ShaderProgram.setUniformValue(iStr.toStdString().c_str(),pointLightColor[0]);
+
+                                             iStr="pointlight["+QString::number(0)+"]."+"constant";
+                                            m_ShaderProgram.setUniformValue(iStr.toStdString().c_str(),1.0f);
+                                              iStr="pointlight["+QString::number(0)+"]."+"linear";
+                                            m_ShaderProgram.setUniformValue(iStr.toStdString().c_str(),0.09f);
+                                              iStr="pointlight["+QString::number(0)+"]."+"quadratic";
+                                            m_ShaderProgram.setUniformValue(iStr.toStdString().c_str(),0.032f);
+
+
+
+
+
+          m_ShaderProgram.setUniformValue("material.shininess", 32.0f);
+          m_ShaderProgram.setUniformValue("light.direction", -0.2f, -1.0f, -0.3f);
+          m_ShaderProgram.setUniformValue("model", model);
+          m_mesh->Draw(m_ShaderProgram,this);
+
+
+
+          m_LightShaderProgram.bind();
+          m_LightShaderProgram.setUniformValue("projection", projection);
+          m_LightShaderProgram.setUniformValue("view", view);
+          model.setToIdentity();
+          model.translate(lightPos);
+          model.rotate(1.0, 1.0f, 1.0f, 0.5f);
+          model.scale(0.2);
+          m_LightShaderProgram.setUniformValue("model", model);
+          m_LightShaderProgram.setUniformValue("lightColor",pointLightColor[0]);
+          m_lightMesh->Draw(m_LightShaderProgram,this);
+//        for(unsigned int i=0;i<4;++i)
+//        {
+//            LightVector[i]->m_shader.bind();
+//            LightVector[i]->m_shader.setUniformValue("view",view);
+//            LightVector[i]->m_shader.setUniformValue("projection",projection);
+//            LightVector[i]->m_shader.setUniformValue("lightColor",pointLightColor[i]);
+//            glBindVertexArray(ActorVector[i]->glData.VAO);
+//            glDrawArrays(GL_TRIANGLES, 0, 36);
+//        }
         break;
     }
 }
@@ -481,8 +524,8 @@ void MyOpenglWidget::keyPressEvent(QKeyEvent *event)
 
     }
 
-    ActorVector[0]->m_shader.bind();
-    ActorVector[0]->m_shader.setUniformValue("ratio",ratio);
+    //ActorVector[0]->m_shader.bind();
+    //ActorVector[0]->m_shader.setUniformValue("ratio",ratio);
 
     update();
 }
@@ -589,4 +632,28 @@ void MyOpenglWidget::wheelEvent(QWheelEvent *event)
 void MyOpenglWidget::on_timeout()
 {
     update();
+}
+
+Mesh * MyOpenglWidget::processMesh(EMeshType meshtype)
+{
+    vector<Vertex> _vertices(36);
+    vector<unsigned int> _indices;
+    vector<Texture> _textures;
+    //因为数组vertices和结构体_vertices表示的数据都是一致的，切内存都是连续的，所以可以直接将数据的数据复制给结构体
+    memcpy(&_vertices[0],vertices,sizeof(vertices));
+
+    for(int i=0;i<36;i++)
+    {
+        _indices.push_back(i);
+    }
+
+    Texture tex;
+    tex.id=m_diffuseTex->textureId();
+    tex.type="texture_diffuse";
+    _textures.push_back(tex);
+    tex.id=m_specularTex->textureId();
+    tex.type="texture_specular";
+    _textures.push_back(tex);
+
+    return new Mesh(QOpenGLContext::currentContext()->versionFunctions<QOpenGLFunctions_3_3_Core>(),_vertices,_indices,_textures,meshtype);
 }

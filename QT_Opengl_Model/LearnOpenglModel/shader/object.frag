@@ -4,9 +4,9 @@
 //受到不同的光照的影响程度
 struct Material
 {
-    sampler2D diffuse;
-    sampler2D specular;
-    sampler2D emission;
+    sampler2D texture_diffuse1;
+    sampler2D texture_specular1;
+
     float shininess;
 };
 uniform Material material;
@@ -41,6 +41,7 @@ struct DirectLight
     vec3 diffuse;
     vec3 specular;
 };
+
 uniform DirectLight directlight;
 vec3 CalcDirectLightColor(DirectLight light);
 
@@ -69,13 +70,11 @@ in vec3 FragPos;
 in vec2 TexCoords;
 
 uniform vec3 objectColor;
-//uniform vec3 lightColor;
-//uniform vec3 lithtPos;
 uniform vec3 viewPos;
 
-vec3 diffuseTexColor=vec3(texture(material.diffuse,TexCoords));
-vec3 specularTexColor=vec3(texture(material.specular,TexCoords));
-vec3 emissionTexColor=vec3(texture(material.emission,TexCoords));
+vec3 diffuseTexColor=vec3(texture(material.texture_diffuse1,TexCoords));
+vec3 specularTexColor=vec3(texture(material.texture_specular1,TexCoords));
+//vec3 emissionTexColor=vec3(texture(material.emission,TexCoords));
 
 vec3 norm=normalize(Normal);
 vec3 viewDir=normalize(viewPos-FragPos);
@@ -88,10 +87,10 @@ void main()
     result += CalcSpotLightColor(spotlight);
     result += CalcDirectLightColor(directlight);
 
-    for(int i=0; i<NR_POINT_LIGHTS;++i)
-    {
-        result+=CalcPointLightColor(pointlight[i]);
-    }
+//    for(int i=0; i<NR_POINT_LIGHTS;++i)
+//    {
+        result+=CalcPointLightColor(pointlight[0]);
+//    }
 
     FragColor = vec4(result, 1.0);
 }

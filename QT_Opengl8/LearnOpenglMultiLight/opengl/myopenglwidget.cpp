@@ -402,7 +402,7 @@ void MyOpenglWidget::paintGL()
                 for(int i=0;i<4;++i)
                 {
                     QString iStr="pointlight["+QString::number(i)+"]."+"position";
-                    ActorVector[i]->m_shader.setUniformValue(iStr.toStdString().c_str(),pointLightColor[i]);
+                    ActorVector[i]->m_shader.setUniformValue(iStr.toStdString().c_str(),pointLightPositions[i]);
 
                     iStr="pointlight["+QString::number(i)+"]."+"ambient";
                     ActorVector[i]->m_shader.setUniformValue(iStr.toStdString().c_str(),pointLightColor[i] *QVector3D(0.2,0.2,0.2));

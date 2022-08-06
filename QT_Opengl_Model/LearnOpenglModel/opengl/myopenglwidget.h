@@ -13,6 +13,7 @@
 #include <QPoint>
 #include <QMouseEvent>
 #include "environmentsettingdialog.h"
+#include "mesh.h"
 
 
 class MyOpenglWidget : public QOpenGLWidget,QOpenGLFunctions_3_3_Core
@@ -56,7 +57,7 @@ public:
     QVector3D DirLight_ambient;
     QVector3D DirLight_diffuse;
     QVector3D DirLight_dspecular;
-
+Camera m_camera;
 
 protected:
     virtual void initializeGL();
@@ -78,21 +79,28 @@ public slots:
     void on_timeout();
 private:
     EShape  m_shape;
-    QOpenGLShaderProgram m_shader;
+    QOpenGLShaderProgram m_ShaderProgram;
     QOpenGLTexture* m_texture1;
 
     QOpenGLShaderProgram shaderProgram;
+    QOpenGLShaderProgram m_LightShaderProgram;
     unsigned int VAO,VBO,EBO;
     QOpenGLTexture * textureWall;
     QOpenGLTexture * textureSmile;
 
     bool isMousePressed;
     QTimer timer;
-    Camera m_camera;
+
 
     QOpenGLTexture * m_diffuseTex;
     QOpenGLTexture * m_specularTex;
     QOpenGLTexture * m_emissionTex;
+
+    Mesh* m_mesh;
+
+    Mesh* m_lightMesh;
+
+    Mesh* processMesh(EMeshType meshtype);
 };
 
 #endif // MYOPENGLWIDGET_H
