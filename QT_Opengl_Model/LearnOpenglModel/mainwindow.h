@@ -26,6 +26,8 @@ private slots:
 
     void on_actEnvironmentSetting_triggered();
 
+    void on_actloadModel_triggered();
+
 private:
     Ui::MainWindow *ui;
 };

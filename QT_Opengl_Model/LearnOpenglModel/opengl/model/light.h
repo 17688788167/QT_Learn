@@ -8,10 +8,8 @@
 class Light
 {
 public:
-Light()
-{
 
-}
+
 
 //    Light(QOpenGLFunctions_3_3_Core* glfun,const QVector3D& light);
 //    void Draw(QOpenGLShaderProgram &shader);

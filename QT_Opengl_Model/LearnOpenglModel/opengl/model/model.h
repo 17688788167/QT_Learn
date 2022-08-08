@@ -38,6 +38,29 @@ vector<Texture> loadMaterialTexture(aiMaterial* mat,aiTextureType type,string ty
 
  vector<Texture> textures_loaded;
 
+ float m_maxX=-10000.0f;
+ float m_maxY=-10000.0f;
+ float m_maxZ=-10000.0f;
+
+ float m_minX=10000.0f;
+ float m_minY=10000.0f;
+ float m_minZ=10000.0f;
+
+public:
+ inline float getModelWidth()const
+ {
+     return m_maxX-m_minX;
+ }
+
+ inline float getModelHeight()const
+ {
+     return m_maxY-m_minY;
+ }
+
+ vector<QVector3D> modelBoxVertices;
+
+ vector<QVector3D> getmodelBoxVertices();
+
 };
 
 #endif // MODEL_H

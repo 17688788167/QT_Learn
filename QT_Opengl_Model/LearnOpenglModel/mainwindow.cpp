@@ -47,11 +47,12 @@ void MainWindow::on_actEnvironmentSetting_triggered()
         ui->openGLWidget->SetEnvironmentType(dlg->getType());
 
     }
-
-
        delete dlg;
+}
 
-
-
-
+#include <QFileDialog>
+void MainWindow::on_actloadModel_triggered()
+{
+    QString str=QFileDialog::getOpenFileName(this,"选择模型文件","","OBJ(*.obj);;FBX(*.fbx);;ALL FILES(*.*)");
+    ui->openGLWidget->LoadModel((str.toStdString()));
 }

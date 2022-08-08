@@ -67,7 +67,7 @@ QWidget:checked{
      <x>0</x>
      <y>0</y>
      <width>990</width>
-     <height>19</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_1">
@@ -124,6 +124,7 @@ QWidget:checked{
    <addaction name="actClear"/>
    <addaction name="actBoxMode"/>
    <addaction name="actEnvironmentSetting"/>
+   <addaction name="actloadModel"/>
   </widget>
   <widget class="QStatusBar" name="statusBar">
    <property name="styleSheet">
@@ -160,6 +161,11 @@ color:rgb(60, 60, 60);
   <action name="actEnvironmentSetting">
    <property name="text">
     <string>环境设置</string>
+   </property>
+  </action>
+  <action name="actloadModel">
+   <property name="text">
+    <string>模型加载</string>
    </property>
   </action>
  </widget>

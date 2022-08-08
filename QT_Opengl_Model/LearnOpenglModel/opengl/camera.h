@@ -82,6 +82,11 @@ public:
         Zoom=ZOOM;
     }
 
+    void SetCameraPosition(QVector3D newPosition)
+    {
+        Position=newPosition;
+    }
+
     // 处理从任何类似键盘的输入系统接收的输入。接受摄像机定义枚举形式的输入参数（从窗口系统中提取）
     void ProcessKeyboard(Camera_Movement direction, float deltaTime)
     {

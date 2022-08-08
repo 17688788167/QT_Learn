@@ -71,8 +71,15 @@ Mesh* Model::processMesh(aiMesh *mesh, const aiScene *scene)
 
         //顶点位置
         vector.setX( mesh->mVertices[i].x);
+        m_maxX=m_maxX<mesh->mVertices[i].x?mesh->mVertices[i].x:m_maxX;
+        m_minX=m_minX>mesh->mVertices[i].x?mesh->mVertices[i].x:m_minX;
         vector.setY( mesh->mVertices[i].y);
+        m_maxY=m_maxY<mesh->mVertices[i].y?mesh->mVertices[i].y:m_maxY;
+        m_minY=m_minY>mesh->mVertices[i].y?mesh->mVertices[i].y:m_minY;
         vector.setZ( mesh->mVertices[i].z);
+        m_maxZ=m_maxZ<mesh->mVertices[i].z?mesh->mVertices[i].z:m_maxZ;
+        m_minZ=m_minZ>mesh->mVertices[i].z?mesh->mVertices[i].z:m_minZ;
+
         vertex.Position=vector;
 
         //法线
@@ -174,5 +181,22 @@ unsigned int Model::TextureFromFile(const char *path, const string &directory)
         cout<<filename <<"  loaded"<<endl;
 
     return texture->textureId();
+}
+
+QVector3D *Model::getmodelBoxVertices()
+{
+
+    modelBoxVertices.push_back(QVector3D(m_minX,m_minY,m_minZ));
+    modelBoxVertices.push_back(QVector3D(m_minX,m_minY,m_maxZ));
+
+    modelBoxVertices.push_back(QVector3D(m_minX,m_maxY,m_minZ));
+    modelBoxVertices.push_back(QVector3D(m_minX,m_maxY,m_maxZ));
+
+    modelBoxVertices.push_back(QVector3D(m_maxX,m_minY,m_minZ));
+    modelBoxVertices.push_back(QVector3D(m_maxX,m_minY,m_maxZ));
+
+    modelBoxVertices.push_back(QVector3D(m_maxX,m_maxY,m_minZ));
+    modelBoxVertices.push_back(QVector3D(m_maxX,m_maxY,m_maxZ));
+
 }
 

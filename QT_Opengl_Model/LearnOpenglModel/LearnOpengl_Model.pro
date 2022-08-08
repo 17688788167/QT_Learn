@@ -35,7 +35,8 @@ SOURCES += \
     environmentsettingdialog.cpp \
     opengl/model/mesh.cpp \
     opengl/model/model.cpp \
-    opengl/model/light.cpp
+    opengl/model/light.cpp \
+    opengl/model/lightbase.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -47,7 +48,8 @@ HEADERS += \
     environmentsettingdialog.h \
     opengl/model/mesh.h \
     opengl/model/model.h \
-    opengl/model/light.h
+    opengl/model/light.h \
+    opengl/model/lightbase.h
 
 FORMS += \
         mainwindow.ui \

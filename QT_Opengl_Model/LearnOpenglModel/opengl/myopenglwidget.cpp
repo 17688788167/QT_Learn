@@ -4,6 +4,13 @@
 #include <QVector3D>
 #include <QtMath>
 
+QVector3D lightPos(1.2f, 1.0f, 2.0f);
+QVector3D objectPos(-1.7f, 3.0f, -7.5f);
+QVector3D objectScale(5.0f, 5.0f, 5.0f);
+QVector3D lightColor(1.0f, 1.0f, 1.0f);
+QVector3D lightDirection(1.0f, 1.0f, 1.0f);
+QVector3D viewInitPos(0.0f,0.0f,5.0f);
+
 const QVector<QVector3D> cubePositions= {
 QVector3D( 0.0f, 0.0f, 0.0f),
 QVector3D( 2.0f, 5.0f, -15.0f),
@@ -161,6 +168,20 @@ void MyOpenglWidget::setWireFrame(bool wireFrame)
     update();
 
 }
+
+void MyOpenglWidget::LoadModel(string path)
+{
+    if(m_model)
+    {
+        delete m_model;
+        m_model=nullptr;
+    }
+    makeCurrent();
+    m_model=new Model(m_glfuns,path.c_str());
+    m_camera.SetCameraPosition(cameraPosInitByModel(m_model));
+    doneCurrent();
+
+}
 QVector3D* pointLightColor;
 void MyOpenglWidget::SetEnvironmentType(EnvironmentSettingDialog::EnvironmentType type)
 {
@@ -209,11 +230,9 @@ void MyOpenglWidget::setType(const EnvironmentSettingDialog::EnvironmentType &ty
 {
     m_type=type;
 }
-QVector3D lightPos(1.2f, 1.0f, 2.0f);
-QVector3D objectPos(-1.7f, 3.0f, -7.5f);
-QVector3D objectScale(5.0f, 5.0f, 5.0f);
-QVector3D lightColor(1.0f, 1.0f, 1.0f);
-QVector3D lightDirection(1.0f, 1.0f, 1.0f);
+
+
+
 const float PI=3.1415926f;
 
 
@@ -252,8 +271,7 @@ void MyOpenglWidget::initializeGL()
     m_glfuns=QOpenGLContext::currentContext()->versionFunctions<QOpenGLFunctions_3_3_Core>();
     m_mesh=processMesh();
     //m_lightMesh=processMesh(EMeshType::Light);
-    //m_light=new Light(m_glfuns,lightColor);
-    m_model=new Model(m_glfuns,"E:/Git/QT/QT_Learn/QT_Opengl_Model/backpack/backpack.obj");
+     m_light=new LightBase(m_glfuns,lightColor);
 
 
 }
@@ -375,6 +393,7 @@ void MyOpenglWidget::paintGL()
           m_ShaderProgram.setUniformValue("light.direction", -0.2f, -1.0f, -0.3f);
           m_ShaderProgram.setUniformValue("model", model);
           m_mesh->Draw(m_ShaderProgram);
+          if(m_model)
           m_model->Draw(m_ShaderProgram);
 
 
@@ -390,7 +409,7 @@ void MyOpenglWidget::paintGL()
           m_LightShaderProgram.setUniformValue("model", model);
           //m_LightShaderProgram.setUniformValue("lightColor",pointLightColor[0]);
           //m_lightMesh->Draw(m_LightShaderProgram);
-           //m_light->Draw(m_LightShaderProgram);
+          m_light->Draw(m_LightShaderProgram);
 
 
         break;
@@ -560,4 +579,11 @@ Mesh * MyOpenglWidget::processMesh()
     _textures.push_back(tex);
 
     return new Mesh(m_glfuns,_vertices,_indices,_textures);
+}
+
+QVector3D MyOpenglWidget::cameraPosInitByModel(Model *model)
+{
+
+    qDebug()<<model->getModelHeight();
+    return viewInitPos*model->getModelHeight()*0.5f;
 }

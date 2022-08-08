@@ -15,9 +15,10 @@
 #include "environmentsettingdialog.h"
 #include "mesh.h"
 #include "model.h"
-#include "model/light.h"
+#include "lightbase.h"
+#include "model/lightbase.h"
 
-
+class Light;
 class MyOpenglWidget : public QOpenGLWidget,QOpenGLFunctions_3_3_Core
 {
     Q_OBJECT
@@ -28,7 +29,7 @@ public:
     void drawShape(EShape shape);
     void setWireFrame(bool wireFrame);
 
-
+    void LoadModel(string path);
 
     void SetEnvironmentType(EnvironmentSettingDialog::EnvironmentType type);
     EnvironmentSettingDialog::EnvironmentType m_type;
@@ -100,10 +101,13 @@ private:
     QOpenGLFunctions_3_3_Core * m_glfuns;
 
     Mesh* m_mesh;
-    Model* m_model;
-    //Light* m_light;
+    Model* m_model=NULL;
+
+    LightBase* m_light;
 
     Mesh* processMesh();
+
+    QVector3D cameraPosInitByModel(Model *model);
 };
 
 #endif // MYOPENGLWIDGET_H
