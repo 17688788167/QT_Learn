@@ -183,7 +183,7 @@ unsigned int Model::TextureFromFile(const char *path, const string &directory)
     return texture->textureId();
 }
 
-QVector3D *Model::getmodelBoxVertices()
+vector <QVector3D> Model::getmodelBoxVertices()
 {
 
     modelBoxVertices.push_back(QVector3D(m_minX,m_minY,m_minZ));
@@ -197,6 +197,6 @@ QVector3D *Model::getmodelBoxVertices()
 
     modelBoxVertices.push_back(QVector3D(m_maxX,m_maxY,m_minZ));
     modelBoxVertices.push_back(QVector3D(m_maxX,m_maxY,m_maxZ));
-
+return modelBoxVertices;
 }
 

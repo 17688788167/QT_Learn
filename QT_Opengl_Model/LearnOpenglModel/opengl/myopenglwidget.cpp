@@ -392,7 +392,8 @@ void MyOpenglWidget::paintGL()
           m_ShaderProgram.setUniformValue("material.shininess", 32.0f);
           m_ShaderProgram.setUniformValue("light.direction", -0.2f, -1.0f, -0.3f);
           m_ShaderProgram.setUniformValue("model", model);
-          m_mesh->Draw(m_ShaderProgram);
+          if(m_mesh)
+          //m_mesh->Draw(m_ShaderProgram);
           if(m_model)
           m_model->Draw(m_ShaderProgram);
 
