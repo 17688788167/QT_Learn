@@ -142,7 +142,7 @@ private:
     void updateCameraVectors()
     {
         // calculate the new Front vector
-        float PI=3.1415926;
+        float PI=3.1415926f;
         QVector3D front;
         front.setX(cos(Yaw*PI/180.0) * cos(Pitch*PI/180.0));
         front.setY( sin(Pitch*PI/180.0));

@@ -32,9 +32,10 @@ SOURCES += \
     opengl/actor.cpp \
     opengl/scene.cpp \
     opengl/camera.cpp \
-    opengl/light.cpp \
     environmentsettingdialog.cpp \
-    opengl/model/mesh.cpp
+    opengl/model/mesh.cpp \
+    opengl/model/model.cpp \
+    opengl/model/light.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -43,9 +44,10 @@ HEADERS += \
     opengl/scene.h \
     opengl/data.h \
     opengl/camera.h \
-    opengl/light.h \
     environmentsettingdialog.h \
-    opengl/model/mesh.h
+    opengl/model/mesh.h \
+    opengl/model/model.h \
+    opengl/model/light.h
 
 FORMS += \
         mainwindow.ui \
@@ -55,3 +57,9 @@ RESOURCES += \
     images/image.qrc \
     shader/shaders.qrc
 
+
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../lib/ -lassimp-vc142-mt
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../lib/ -lassimp-vc142-mtd
+
+INCLUDEPATH += $$PWD/../include
+DEPENDPATH += $$PWD/../include

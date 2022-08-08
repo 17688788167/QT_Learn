@@ -14,6 +14,8 @@
 #include <QMouseEvent>
 #include "environmentsettingdialog.h"
 #include "mesh.h"
+#include "model.h"
+#include "model/light.h"
 
 
 class MyOpenglWidget : public QOpenGLWidget,QOpenGLFunctions_3_3_Core
@@ -95,12 +97,13 @@ private:
     QOpenGLTexture * m_diffuseTex;
     QOpenGLTexture * m_specularTex;
     QOpenGLTexture * m_emissionTex;
+    QOpenGLFunctions_3_3_Core * m_glfuns;
 
     Mesh* m_mesh;
+    Model* m_model;
+    //Light* m_light;
 
-    Mesh* m_lightMesh;
-
-    Mesh* processMesh(EMeshType meshtype);
+    Mesh* processMesh();
 };
 
 #endif // MYOPENGLWIDGET_H

@@ -9,4 +9,7 @@
         <file>lighting_maps_specular_color.png</file>
         <file>matrix.jpg</file>
     </qresource>
+    <qresource prefix="/">
+        <file>../../backpack/backpack.obj</file>
+    </qresource>
 </RCC>
