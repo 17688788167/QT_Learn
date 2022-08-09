@@ -1,4 +1,4 @@
-#include "myopenglwidget.h"
+﻿#include "myopenglwidget.h"
 
 #include "QDebug"
 #include <QVector3D>
@@ -13,6 +13,13 @@ QVector3D objectScale(5.0f, 5.0f, 5.0f);
 QVector3D lightColor(1.0f, 1.0f, 1.0f);
 QVector3D lightDirection(1.0f, 1.0f, 1.0f);
 QVector3D viewInitPos(0.0f,0.0f,5.0f);
+
+float _near=0.1f;
+float _far=1000.0f;
+QMatrix4x4 model;
+QMatrix4x4 view;
+QMatrix4x4 projection;
+
 
 const QVector<QVector3D> cubePositions= {
 QVector3D( 0.0f, 0.0f, 0.0f),
@@ -256,15 +263,13 @@ void MyOpenglWidget::initializeGL()
     glEnable(GL_DEPTH_TEST);
     m_shape=Rect;
 
-
-
     bool success;
     m_ShaderProgram.addShaderFromSourceFile(QOpenGLShader::Vertex,":/shader/object.vert");
     m_ShaderProgram.addShaderFromSourceFile(QOpenGLShader::Fragment,":/shader/object.frag");
     success=m_ShaderProgram.link();
     if(!success) qDebug()<<"ERR:"<<m_ShaderProgram.log();
 
-    m_diffuseTex=new QOpenGLTexture(QImage(":/iamge/container2.png").mirrored());
+    m_diffuseTex=new QOpenGLTexture(QImage(":/iamge/wall.jpg").mirrored());
     m_specularTex=new QOpenGLTexture(QImage(":/iamge/container2_specular.png").mirrored());
     m_ShaderProgram.bind();
 
@@ -274,21 +279,19 @@ void MyOpenglWidget::initializeGL()
     if(!success) qDebug()<<"ERR:"<<m_LightShaderProgram.log();
 
     m_glfuns=QOpenGLContext::currentContext()->versionFunctions<QOpenGLFunctions_3_3_Core>();
-    //m_mesh=processMesh();
 
-
-    //m_CubeMesh=processMesh(Data::verticesAndTexCoords,36,m_diffuseTex->textureId());
     m_PlaneMesh=processMesh(&Data::verticesAndTexCoords[0],6,m_specularTex->textureId());
     m_CubeMesh=processMesh(&Data::verticesAndTexCoords[0],36,m_diffuseTex->textureId());
     m_light=new LightBase(m_glfuns,lightColor);
 
-    string path="../backpack/backpack.obj";
-    cout<<"path:"<<path;
+    string path="../../environment/backpack/backpack.obj";
+    cout<<"path:"<<path<<endl;
     //m_model=new Model(m_glfuns,path.c_str());
-   //m_model=new Model(m_glfuns,"E:/Git/QT/QT_Learn/QT_Opengl_Depth/backpack/backpack.obj");
+    //m_model=new Model(m_glfuns,"E:/Git/QT/QT_Learn/QT_Opengl_Depth/backpack/backpack.obj");
     //m_camera.SetCameraPosition(cameraPosInitByModel(m_model));
 
-
+    projection.setToIdentity();
+    projection.perspective(m_camera.Zoom,(float)width()/height(),_near,_far);
 }
 
 void MyOpenglWidget::resizeGL(int w, int h)
@@ -297,6 +300,9 @@ void MyOpenglWidget::resizeGL(int w, int h)
     Q_UNUSED(h);
 
 }
+
+
+
 void MyOpenglWidget::paintGL()
 {
 
@@ -304,9 +310,10 @@ void MyOpenglWidget::paintGL()
     deltaTime=CurrentTime-lastTime;
     lastTime=CurrentTime;
 
-    QMatrix4x4 model;
-    QMatrix4x4 view;
-    QMatrix4x4 projection;
+    model.setToIdentity();
+    view.setToIdentity();
+
+
 
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
@@ -321,22 +328,20 @@ void MyOpenglWidget::paintGL()
             {
                 ratio+=0.5*deltaTime;
                 ratio=ratio>1?1:ratio;
-                //ActorVector[0]->AddActorLocation(deltaTime*2*QVector3D(0,0,1));
             }
             else if(i==7)
             {
                 ratio-=0.5*deltaTime;
                 ratio=ratio<0?0:ratio;
-                //ActorVector[0]->AddActorLocation(-deltaTime*2*QVector3D(0,0,1));
             }
-            //qDebug()<<ratio;
+
         }
 
     }
 
 
     view=m_camera.GetViewMatrix();
-    projection.perspective(m_camera.Zoom,(float)width()/height(),0.1f,1000);
+
 
     glClearColor(ClearColor.x(),ClearColor.y(),ClearColor.z(), 1.0f);
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
@@ -347,22 +352,13 @@ void MyOpenglWidget::paintGL()
 
             m_ShaderProgram.bind();
 
-         // m_mesh->Draw(m_ShaderProgram,this);
           m_ShaderProgram.setUniformValue("projection", projection);
           m_ShaderProgram.setUniformValue("view", view);
-          //model.rotate(CurrentTime*10, 1.0f, 1.0f, 0.5f);
           m_ShaderProgram.setUniformValue("viewPos",m_camera.Position);
 
-          m_ShaderProgram.setUniformValue("light.ambient", 0.4f, 0.4f, 0.4f);
-          m_ShaderProgram.setUniformValue("light.diffuse", 0.9f, 0.9f, 0.9f);
-          m_ShaderProgram.setUniformValue("light.specular", 1.0f, 1.0f, 1.0f);
 
 
-          //方向光
-          m_ShaderProgram.setUniformValue("directlight.direction",-0.2f, -1.0f, -0.3f);
-          m_ShaderProgram.setUniformValue("directlight.ambient",DirLight_ambient);
-          m_ShaderProgram.setUniformValue("directlight.diffuse",DirLight_diffuse);
-          m_ShaderProgram.setUniformValue("directlight.specular", DirLight_dspecular);
+
 
                           //聚光灯
                           m_ShaderProgram.setUniformValue("spotlight.position",m_camera.Position);
@@ -384,6 +380,8 @@ void MyOpenglWidget::paintGL()
                          m_ShaderProgram.setUniformValue("directlight.diffuse",DirLight_diffuse);
                          m_ShaderProgram.setUniformValue("directlight.specular", DirLight_dspecular);
 
+                         //点光源
+
                                              QString iStr="pointlight["+QString::number(0)+"]."+"position";
                                             m_ShaderProgram.setUniformValue(iStr.toStdString().c_str(),lightPos);
 
@@ -401,11 +399,10 @@ void MyOpenglWidget::paintGL()
                                               iStr="pointlight["+QString::number(0)+"]."+"quadratic";
                                             m_ShaderProgram.setUniformValue(iStr.toStdString().c_str(),0.032f);
 
+                         //材质
 
+                        m_ShaderProgram.setUniformValue("material.shininess", 32.0f);
 
-           //glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
-          m_ShaderProgram.setUniformValue("material.shininess", 32.0f);
-          m_ShaderProgram.setUniformValue("light.direction", -0.2f, -1.0f, -0.3f);
 
 
           if(m_CubeMesh)
@@ -429,19 +426,11 @@ void MyOpenglWidget::paintGL()
             }
 
 
-
-
-
-//          if(m_mesh)
-//          {
-//             m_mesh->Draw(m_ShaderProgram);
-//          }
-
           if(m_model)
           {
+             model.setToIdentity();
              m_model->Draw(m_ShaderProgram);
           }
-
 
 
           m_LightShaderProgram.bind();
@@ -459,12 +448,7 @@ void MyOpenglWidget::paintGL()
           model.rotate(1.0f, 1.0f, 1.0f, 0.5f);
           model.scale(0.2f);
           m_LightShaderProgram.setUniformValue("model", model);
-          //m_LightShaderProgram.setUniformValue("lightColor",pointLightColor[0]);
-          //m_lightMesh->Draw(m_LightShaderProgram);
           m_light->Draw(m_LightShaderProgram);
-
-
-
 
         break;
     }
@@ -552,26 +536,40 @@ void MyOpenglWidget::keyReleaseEvent(QKeyEvent *event)
 
 void MyOpenglWidget::mousePressEvent(QMouseEvent *event)
 {
-    if(event->button()==Qt::LeftButton)
+
+    makeCurrent();
+    if(event->button()&Qt::LeftButton)
     {
           keyboard|= 1;
+
+          mousePickingPos(worldPosFromViewPort(event->pos().x(),event->pos().y()));
+
     }
-    else if(event->button()==Qt::RightButton)
+    else if(event->button()&Qt::RightButton)
     {
          keyboard|= 1<<1;
     }
     isMousePressed=true;
+
+
+
+
+
+
+   doneCurrent();
+
+
 }
 
 void MyOpenglWidget::mouseReleaseEvent(QMouseEvent *event)
 {
     int Temp;
-    if(event->button()==Qt::LeftButton)
+    if(event->button()&Qt::LeftButton)
     {
         Temp=~1;
         keyboard &=Temp;
     }
-    else if(event->button()==Qt::RightButton)
+    else if(event->button()&Qt::RightButton)
     {
         Temp=~(1<<1);
         keyboard &=Temp;
@@ -667,4 +665,33 @@ QVector3D MyOpenglWidget::cameraPosInitByModel(Model *model)
 {
     qDebug()<<model->getModelHeight();
     return viewInitPos*model->getModelHeight()*0.5f;
+}
+
+QVector4D MyOpenglWidget::worldPosFromViewPort(int posX, int posY)
+{
+    float winZ;
+    glReadPixels(posX,this->height()-posY,1,1,
+                GL_DEPTH_COMPONENT,GL_FLOAT,&winZ );
+
+      //将屏幕坐标x（0，width）映射到标准坐标空间（-1，1）
+    float x=2.0f*posX/this->width()-1.0f;
+     //将屏幕坐标y（0，height）映射到标准坐标空间（1，-1）
+    float y=1.0f-2.0f*posY/this->height();
+    //将上式算出的深度值winZ（0，1）映射到标准坐标空间（-1，1）
+    float z=winZ*2.0f-1.0f;
+  float w=(2.0f*_near*_far)/(_far+_near-z*(_far-_near));
+
+  QVector4D worldPositon(x,y,z,1.0f);
+  worldPositon*=w;
+  worldPositon=view.inverted()*projection.inverted()*worldPositon;
+
+  qDebug()<<"x:"<<worldPositon.x()
+           <<"y:"<<worldPositon.y()
+           << "z:"<<worldPositon.z()
+          << "w:"<<worldPositon.w();
+
+           qDebug()<<"winZ"<<winZ;
+
+           return worldPositon;
+
 }

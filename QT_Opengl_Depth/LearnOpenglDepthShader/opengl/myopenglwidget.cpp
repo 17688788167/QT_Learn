@@ -592,11 +592,11 @@ void MyOpenglWidget::mouseMoveEvent(QMouseEvent *event)
     float mouse_x=currentPos.x();
     float mouse_y=currentPos.y();
 
-    float ndc_x=(2.0f*mouse_x)/width-1.0f;
-    float ndc_y=1.0f-(2.0f*mouse_y)/height;
+    float ndc_x=(2.0f*mouse_x)/width()-1.0f;
+    float ndc_y=1.0f-(2.0f*mouse_y)/height();
 
     float mouse_z;
-    glReadPixels((int)mouse_x,height-(int)mouse_y,1,1,GL_DEPTH_COMPONENT,GL_FLOAT,&mouse_z);
+    glReadPixels((int)mouse_x,height()-(int)mouse_y,1,1,GL_DEPTH_COMPONENT,GL_FLOAT,&mouse_z);
 
     deltaPos=currentPos-lastPos;
     lastPos=currentPos;

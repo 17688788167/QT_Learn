@@ -9,14 +9,5 @@
         <file>lighting_maps_specular_color.png</file>
         <file>matrix.jpg</file>
     </qresource>
-    <qresource prefix="/">
-        <file>../../backpack/backpack.obj</file>
-        <file>../../backpack/ao.jpg</file>
-        <file>../../backpack/backpack.mtl</file>
-        <file>../../backpack/diffuse.jpg</file>
-        <file>../../backpack/normal.png</file>
-        <file>../../backpack/roughness.jpg</file>
-        <file>../../backpack/source_attribution.txt</file>
-        <file>../../backpack/specular.jpg</file>
-    </qresource>
+    <qresource prefix="/"/>
 </RCC>

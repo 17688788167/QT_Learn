@@ -8,6 +8,8 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     setCentralWidget(ui->openGLWidget);
+
+    connect(ui->openGLWidget,SIGNAL(mousePickingPos(QVector4D)),this,SLOT(getMousePickingPos(QVector4D)));
 }
 
 MainWindow::~MainWindow()
@@ -55,4 +57,18 @@ void MainWindow::on_actloadModel_triggered()
 {
     QString str=QFileDialog::getOpenFileName(this,"选择模型文件","","OBJ(*.obj);;FBX(*.fbx);;ALL FILES(*.*)");
     ui->openGLWidget->LoadModel((str.toStdString()));
+}
+
+void MainWindow::getMousePickingPos(const QVector4D &pos)
+{
+    float x=pos.x();
+    float y=pos.y();
+    float z=pos.z();
+
+    ui->statusBar->setStyleSheet("font: 14pt ");
+    ui->statusBar->showMessage(" 世界坐标    X:"+QString::number(x,'f', 2)
+    +" Y:"+QString::number(y,'f', 2)
+    +" Z:"+QString::number(z,'f', 2)
+    );
+
 }

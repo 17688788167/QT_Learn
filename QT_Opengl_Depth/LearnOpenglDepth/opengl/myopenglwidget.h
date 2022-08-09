@@ -77,7 +77,7 @@ protected:
 
 
 signals:
-
+    void mousePickingPos(const QVector4D& pos);
 public slots:
     void on_timeout();
 private:
@@ -110,6 +110,8 @@ private:
     Mesh* processMesh();
     Mesh* processMesh(const float *vertices,int size,unsigned int textureId);
     QVector3D cameraPosInitByModel(Model *model);
+
+    QVector4D worldPosFromViewPort(int posX,int posY);
 };
 
 #endif // MYOPENGLWIDGET_H

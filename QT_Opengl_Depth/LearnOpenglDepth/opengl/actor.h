@@ -1,4 +1,4 @@
-#ifndef ACTOR_H
+﻿#ifndef ACTOR_H
 #define ACTOR_H
 #include "scene.h"
 #include <QOpenGLFunctions_3_3_Core>
@@ -54,6 +54,8 @@ void AddActorLocation(const QVector3D& LocOffset);
 void Rotate();
 
 void UpdateModel();
+
+
 };
 
 #endif // ACTOR_H

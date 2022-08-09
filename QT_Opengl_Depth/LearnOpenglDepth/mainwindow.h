@@ -28,6 +28,8 @@ private slots:
 
     void on_actloadModel_triggered();
 
+    void getMousePickingPos(const QVector4D &pos);
+
 private:
     Ui::MainWindow *ui;
 };
