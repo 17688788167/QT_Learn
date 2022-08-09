@@ -1,0 +1,22 @@
+<RCC>
+    <qresource prefix="/iamge">
+        <file>awesomeface.png</file>
+        <file>small.png</file>
+        <file>wall.jpg</file>
+        <file>container2.png</file>
+        <file>container2_specular.png</file>
+        <file>image.qrc</file>
+        <file>lighting_maps_specular_color.png</file>
+        <file>matrix.jpg</file>
+    </qresource>
+    <qresource prefix="/">
+        <file>../../backpack/backpack.obj</file>
+        <file>../../backpack/ao.jpg</file>
+        <file>../../backpack/backpack.mtl</file>
+        <file>../../backpack/diffuse.jpg</file>
+        <file>../../backpack/normal.png</file>
+        <file>../../backpack/roughness.jpg</file>
+        <file>../../backpack/source_attribution.txt</file>
+        <file>../../backpack/specular.jpg</file>
+    </qresource>
+</RCC>

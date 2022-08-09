@@ -387,8 +387,7 @@ void MyOpenglWidget::paintGL()
 
 
 
-
-
+           glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
           m_ShaderProgram.setUniformValue("material.shininess", 32.0f);
           m_ShaderProgram.setUniformValue("light.direction", -0.2f, -1.0f, -0.3f);
           m_ShaderProgram.setUniformValue("model", model);
@@ -399,10 +398,18 @@ void MyOpenglWidget::paintGL()
 
 
 
+          glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
 
           m_LightShaderProgram.bind();
           m_LightShaderProgram.setUniformValue("projection", projection);
           m_LightShaderProgram.setUniformValue("view", view);
+           m_LightShaderProgram.setUniformValue("model", model);
+
+           if(m_model)
+           {
+               m_model->DrawBox(m_LightShaderProgram);
+           }
+
           model.setToIdentity();
           model.translate(lightPos);
           model.rotate(1.0f, 1.0f, 1.0f, 0.5f);
@@ -411,6 +418,8 @@ void MyOpenglWidget::paintGL()
           //m_LightShaderProgram.setUniformValue("lightColor",pointLightColor[0]);
           //m_lightMesh->Draw(m_LightShaderProgram);
           m_light->Draw(m_LightShaderProgram);
+
+
 
 
         break;
@@ -582,9 +591,36 @@ Mesh * MyOpenglWidget::processMesh()
     return new Mesh(m_glfuns,_vertices,_indices,_textures);
 }
 
+Mesh *MyOpenglWidget::processMesh(float *vertices, int size, unsigned int textureId)
+{
+    vector<Vertex> _vertices;
+    vector<unsigned int> _indices;
+    vector<Texture> _textures;
+
+    for(int i=0;i>size;i++)
+    {
+        Vertex vert;
+        vert.Position[0]=vertices[i*5+0];
+        vert.Position[1]=vertices[i*5+1];
+        vert.Position[2]=vertices[i*5+2];
+
+        vert.TexCoords[0]=vertices[i*5+3];
+        vert.TexCoords[1]=vertices[i*5+4];
+
+        _vertices.push_back(vert);
+        _indices.push_back(i);
+    }
+
+    Texture tex;
+    tex.id=textureId;
+    tex.type="texture_diffuse";
+    _textures.push_back(tex);
+
+    return new Mesh(m_glfuns,_vertices,_indices,_textures);
+}
+
 QVector3D MyOpenglWidget::cameraPosInitByModel(Model *model)
 {
-
     qDebug()<<model->getModelHeight();
     return viewInitPos*model->getModelHeight()*0.5f;
 }

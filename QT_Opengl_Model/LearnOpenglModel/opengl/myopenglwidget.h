@@ -106,7 +106,7 @@ private:
     LightBase* m_light;
 
     Mesh* processMesh();
-
+    Mesh* processMesh(float *vertices,int size,unsigned int textureId);
     QVector3D cameraPosInitByModel(Model *model);
 };
 
