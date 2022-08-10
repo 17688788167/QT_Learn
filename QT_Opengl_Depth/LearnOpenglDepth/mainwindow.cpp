@@ -9,7 +9,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     setCentralWidget(ui->openGLWidget);
 
-    connect(ui->openGLWidget,SIGNAL(mousePickingPos(QVector4D)),this,SLOT(getMousePickingPos(QVector4D)));
+    connect(ui->openGLWidget,SIGNAL(mousePickingPos(QVector3D)),this,SLOT(getMousePickingPos(QVector3D)));
 }
 
 MainWindow::~MainWindow()
@@ -59,7 +59,7 @@ void MainWindow::on_actloadModel_triggered()
     ui->openGLWidget->LoadModel((str.toStdString()));
 }
 
-void MainWindow::getMousePickingPos(const QVector4D &pos)
+void MainWindow::getMousePickingPos(const QVector3D &pos)
 {
     float x=pos.x();
     float y=pos.y();

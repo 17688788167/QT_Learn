@@ -133,21 +133,29 @@ MyOpenglWidget::~MyOpenglWidget()
 
     makeCurrent();
 
-    if(m_mesh)
+    if(m_CubeMesh)
     {
-        delete m_mesh;
-        m_mesh=nullptr;
+        delete m_CubeMesh;
+        m_CubeMesh=nullptr;
     }
-//    if(m_light)
-//    {
-//        delete m_light;
-//        m_light=nullptr;
-//    }
-    if(m_model)
+    if(m_PlaneMesh)
     {
-        delete m_model;
-        m_model=nullptr;
+        delete m_PlaneMesh;
+        m_PlaneMesh=nullptr;
     }
+
+    if(m_light)
+    {
+        delete m_light;
+        m_light=nullptr;
+    }
+
+    foreach(auto modelinfo,m_models)
+    {
+        delete modelinfo._model;
+    }
+    m_models.empty();
+
     doneCurrent();
 }
 
@@ -181,14 +189,14 @@ void MyOpenglWidget::setWireFrame(bool wireFrame)
 
 void MyOpenglWidget::LoadModel(string path)
 {
-    if(m_model)
-    {
-        delete m_model;
-        m_model=nullptr;
-    }
+
     makeCurrent();
-    m_model=new Model(m_glfuns,path.c_str());
-    m_camera.SetCameraPosition(cameraPosInitByModel(m_model));
+    static int i=0;
+    Model* m_model=new Model(m_glfuns,path.c_str());
+
+    QVector3D modelPostion=m_camera.Position+m_camera.Front*20.0f-QVector3D(0.0f,m_model->getModelHeight()*0.5,0.0f) ;
+
+    m_models["张三"+QString::number(i++)]=FModelInfo(m_model,modelPostion);
     doneCurrent();
 
 }
@@ -284,12 +292,20 @@ void MyOpenglWidget::initializeGL()
     m_CubeMesh=processMesh(&Data::verticesAndTexCoords[0],36,m_diffuseTex->textureId());
     m_light=new LightBase(m_glfuns,lightColor);
 
+    //shared_ptr<Mesh> m_shareptrMesh(m_CubeMesh);
+
+
     string path="../../environment/backpack/backpack.obj";
     cout<<"path:"<<path<<endl;
     //m_model=new Model(m_glfuns,path.c_str());
     //m_model=new Model(m_glfuns,"E:/Git/QT/QT_Learn/QT_Opengl_Depth/backpack/backpack.obj");
     //m_camera.SetCameraPosition(cameraPosInitByModel(m_model));
 
+    Model* m_model=new Model(m_glfuns,path.c_str());
+
+    QVector3D modelPostion=m_camera.Position+m_camera.Front*20.0f-QVector3D(0.0f,m_model->getModelHeight()*0.5,0.0f) ;
+
+    m_models["张三"+QString::number(-1)]=FModelInfo(m_model,modelPostion);
     projection.setToIdentity();
     projection.perspective(m_camera.Zoom,(float)width()/height(),_near,_far);
 }
@@ -323,7 +339,19 @@ void MyOpenglWidget::paintGL()
         if(keyboard &temp)
         {
             if(i<6)
-            m_camera.ProcessKeyboard((Camera_Movement)i,deltaTime);
+            {
+                if(isCtrlCamera)
+                {
+                  m_camera.ProcessKeyboard((Camera_Movement)i,deltaTime);
+                }
+                else
+                {
+                    for(int i=0;i<selectedModels.size();++i)
+                    {
+
+                    }
+                }
+            }
             else if(i==6)
             {
                 ratio+=0.5*deltaTime;
@@ -425,24 +453,32 @@ void MyOpenglWidget::paintGL()
                 m_PlaneMesh->Draw(m_ShaderProgram);
             }
 
+            foreach(auto modelInfo,m_models)
+            {
+                model.setToIdentity();
+                model.translate(modelInfo._worldPos);
+                model.rotate(modelInfo._pitch,QVector3D(1.0f,0.0f,0.0f));
+                model.rotate(modelInfo._yaw,QVector3D(0.0f,1.0f,0.0f));
+                model.rotate(modelInfo._roll,QVector3D(0.0f,0.0f,1.0f));
+                m_ShaderProgram.setUniformValue("model", model);
 
-          if(m_model)
-          {
-             model.setToIdentity();
-             m_model->Draw(m_ShaderProgram);
-          }
+                modelInfo._model->Draw(m_ShaderProgram);
+
+                if(modelInfo._isSelected)
+                {
+                    m_LightShaderProgram.bind();
+                    m_LightShaderProgram.setUniformValue("projection", projection);
+                    m_LightShaderProgram.setUniformValue("view", view);
+                    m_LightShaderProgram.setUniformValue("model", model);
+                    modelInfo._model->DrawBox(m_LightShaderProgram);
+                }
+
+            }
 
 
-          m_LightShaderProgram.bind();
-          m_LightShaderProgram.setUniformValue("projection", projection);
-          m_LightShaderProgram.setUniformValue("view", view);
-          m_LightShaderProgram.setUniformValue("model", model);
 
-           if(m_model)
-           {
-               m_model->DrawBox(m_LightShaderProgram);
-           }
 
+ m_LightShaderProgram.bind();
           model.setToIdentity();
           model.translate(lightPos);
           model.rotate(1.0f, 1.0f, 1.0f, 0.5f);
@@ -541,9 +577,27 @@ void MyOpenglWidget::mousePressEvent(QMouseEvent *event)
     if(event->button()&Qt::LeftButton)
     {
           keyboard|= 1;
-
-          mousePickingPos(worldPosFromViewPort(event->pos().x(),event->pos().y()));
-
+         //qDebug()<<"鼠标单击:"<<event->pos().x()<<" "<<event->pos().y();
+          QVector3D ClickWorldPos= QVector3D( worldPosFromViewPort(event->pos().x(),event->pos().y()));
+          mousePickingPos(ClickWorldPos);
+            isCtrlCamera=true;
+            selectedModels.empty();
+          for(auto iter=m_models.begin();iter!=m_models.end();++iter)
+          {
+              FModelInfo* modelinfo=&iter.value();
+              float r=std::max(modelinfo->_model->getModelHeight()*0.5f,modelinfo->_model->getModelWidth()*0.5f);
+              float distance=modelinfo->getCenterPoint().distanceToPoint(ClickWorldPos);
+              modelinfo->_isSelected=distance<r;
+              qDebug()<<"r:"<<r
+                     <<" distance:"<<distance
+                       <<" "<<modelinfo->_isSelected;
+              if(modelinfo->_isSelected)
+              {
+                 selectedModels.push_back(modelinfo->_model);
+                 isCtrlCamera=false;
+              }
+              update();
+          }
     }
     else if(event->button()&Qt::RightButton)
     {
@@ -590,7 +644,15 @@ void MyOpenglWidget::mouseMoveEvent(QMouseEvent *event)
     lastPos=currentPos;
     if(isCanUseMouseMove)
     {
+        if(isCtrlCamera)
         m_camera.ProcessMouseMovement(deltaPos.x(),-deltaPos.y());
+        else
+        {
+            for(int i=0;i<selectedModels.size();++i)
+            {
+                //实现拖拽模型,很简单,以后有空再做
+            }
+        }
         update();
     }
 
@@ -602,6 +664,23 @@ void MyOpenglWidget::wheelEvent(QWheelEvent *event)
     m_camera.ProcessMouseScroll(event->angleDelta().y()/120);
     qDebug()<<event->angleDelta().y();
     update();
+}
+
+void MyOpenglWidget::mouseDoubleClickEvent(QMouseEvent *event)
+{
+//    qDebug()<<"鼠标双击:"<<event->pos().x()<<" "<<event->pos().y();
+//   // QVector3D ClickWorldPos= QVector3D( worldPosFromViewPort(event->pos().x(),event->pos().y()));
+//    foreach(auto modelinfo,m_models)
+//    {
+//        float r=std::max(modelinfo._model->getModelHeight()*0.5f,modelinfo._model->getModelWidth()*0.5f);
+//        float distance=ClickWorldPos.distanceToPoint(modelinfo._worldPos);
+//        modelinfo._isSelected=distance<r;
+//        qDebug()<<"r:"<<r
+//               <<" distance:"<<distance;
+
+//    }
+
+
 }
 
 void MyOpenglWidget::on_timeout()
@@ -669,7 +748,9 @@ QVector3D MyOpenglWidget::cameraPosInitByModel(Model *model)
 
 QVector4D MyOpenglWidget::worldPosFromViewPort(int posX, int posY)
 {
+    qDebug()<<"鼠标:"<<posX<<" "<<posY;
     float winZ;
+
     glReadPixels(posX,this->height()-posY,1,1,
                 GL_DEPTH_COMPONENT,GL_FLOAT,&winZ );
 
@@ -688,7 +769,7 @@ QVector4D MyOpenglWidget::worldPosFromViewPort(int posX, int posY)
   qDebug()<<"x:"<<worldPositon.x()
            <<"y:"<<worldPositon.y()
            << "z:"<<worldPositon.z()
-          << "w:"<<worldPositon.w();
+            << "w:"<<worldPositon.w();
 
            qDebug()<<"winZ"<<winZ;
 

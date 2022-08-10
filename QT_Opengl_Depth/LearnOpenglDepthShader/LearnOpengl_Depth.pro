@@ -60,8 +60,3 @@ RESOURCES += \
     shader/shaders.qrc
 
 
-win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../lib/ -lassimp-vc142-mt
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../lib/ -lassimp-vc142-mtd
-
-INCLUDEPATH += $$PWD/../include
-DEPENDPATH += $$PWD/../include

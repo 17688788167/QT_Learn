@@ -11,7 +11,7 @@ class MyOpenglWidget;
 class Actor:public QOpenGLFunctions_3_3_Core
 {
 public:
-    Actor();
+
     Actor(MyOpenglWidget* openGLWidget,const QString&VertexCodeFile,const QString&FragmentCodeFile);
 
     ~Actor();

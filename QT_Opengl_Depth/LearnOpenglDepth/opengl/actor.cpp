@@ -7,10 +7,7 @@ using namespace std;
 
 
 constexpr float Data::verticesAndTexCoords[];
-Actor::Actor()
-{
 
-}
 
 Actor::Actor( MyOpenglWidget*openGLWidget,const QString&VertexCodeFile,const QString&FragmentCodeFile)
 {

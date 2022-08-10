@@ -17,6 +17,7 @@
 #include "model.h"
 #include "lightbase.h"
 #include "model/lightbase.h"
+#include <memory>
 
 class Light;
 class MyOpenglWidget : public QOpenGLWidget,QOpenGLFunctions_3_3_Core
@@ -73,11 +74,11 @@ protected:
     void mouseReleaseEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
     void wheelEvent(QWheelEvent *event);
-
+    void mouseDoubleClickEvent(QMouseEvent *event);
 
 
 signals:
-    void mousePickingPos(const QVector4D& pos);
+    void mousePickingPos(const QVector3D& pos);
 public slots:
     void on_timeout();
 private:
@@ -103,7 +104,13 @@ private:
     Mesh* m_mesh;
     Mesh* m_CubeMesh;
     Mesh* m_PlaneMesh;
-    Model* m_model=NULL;
+
+    bool isCtrlCamera=true;
+
+    QMap<QString,FModelInfo> m_models;
+
+    std::vector<Model*> selectedModels;
+
 
     LightBase* m_light;
 
