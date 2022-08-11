@@ -103,16 +103,12 @@ private:
     QOpenGLTexture * m_specularTex;
     QOpenGLTexture * m_emissionTex;
     QOpenGLTexture * m_grassTex;
-        QOpenGLTexture * m_blendTex;
-
     QOpenGLFunctions_3_3_Core * m_glfuns;
 
     Mesh* m_mesh;
     Mesh* m_CubeMesh;
     Mesh* m_PlaneMesh;
 
-    vector<Mesh*> m_grassMeshs;
-    Mesh* m_blendMesh;
     bool isCtrlCamera=true;
 
     QMap<QString,FModelInfo> m_models;

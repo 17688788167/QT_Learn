@@ -5,6 +5,5 @@
         <file>object.frag</file>
         <file>object.vert</file>
         <file>singleColor.frag</file>
-        <file>discard.frag</file>
     </qresource>
 </RCC>

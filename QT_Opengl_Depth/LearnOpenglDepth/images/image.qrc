@@ -8,6 +8,25 @@
         <file>image.qrc</file>
         <file>lighting_maps_specular_color.png</file>
         <file>matrix.jpg</file>
+        <file>grass.png</file>
     </qresource>
-    <qresource prefix="/"/>
+    <qresource prefix="/">
+        <file>../../../environment/image/awesomeface.png</file>
+        <file>../../../environment/image/blending_transparent_window.png</file>
+        <file>../../../environment/image/container2.png</file>
+        <file>../../../environment/image/container2_specular.png</file>
+        <file>../../../environment/image/grass.png</file>
+        <file>../../../environment/image/instancing_asteroids.png</file>
+        <file>../../../environment/image/instancing_quads.png</file>
+        <file>../../../environment/image/lighting_maps_specular_color.png</file>
+        <file>../../../environment/image/matrix.jpg</file>
+        <file>../../../environment/image/rock.jpg</file>
+        <file>../../../environment/image/wall.jpg</file>
+        <file>../../../environment/image/skybox/back.jpg</file>
+        <file>../../../environment/image/skybox/bottom.jpg</file>
+        <file>../../../environment/image/skybox/front.jpg</file>
+        <file>../../../environment/image/skybox/left.jpg</file>
+        <file>../../../environment/image/skybox/right.jpg</file>
+        <file>../../../environment/image/skybox/top.jpg</file>
+    </qresource>
 </RCC>

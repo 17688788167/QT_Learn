@@ -116,8 +116,6 @@ QVector3D pointLightColorsBiochemicalLab[] = {
 ;
 
 
-vector<QVector3D> vegetation;
-std::map<float,QVector3D>sorted;
 MyOpenglWidget::MyOpenglWidget(QWidget *parent) : QOpenGLWidget(parent)
 {
     //激活键盘鼠标事件
@@ -128,21 +126,6 @@ MyOpenglWidget::MyOpenglWidget(QWidget *parent) : QOpenGLWidget(parent)
     SetEnvironmentType(EnvironmentSettingDialog::EnvironmentType::DESERT);
     connect(&timer,SIGNAL(timeout()),this,SLOT(on_timeout()));
     timer.start(10);
-
-    vegetation.push_back(QVector3D(-1.5f,0.0f,-0.48f));
-    vegetation.push_back(QVector3D(1.5f,0.0f,0.51f));
-    vegetation.push_back(QVector3D(0.0f,0.0f,0.7f));
-    vegetation.push_back(QVector3D(-0.3f,0.0f,-2.3f));
-    vegetation.push_back(QVector3D(0.5f,0.0f,-0.6f));
-
-
-    foreach(auto item,vegetation)
-    {
-        float distance=m_camera.Position.distanceToPoint(item);
-        sorted[distance]=item;
-    }
-
-
 }
 
 MyOpenglWidget::~MyOpenglWidget()
@@ -225,7 +208,7 @@ void MyOpenglWidget::SetEnvironmentType(EnvironmentSettingDialog::EnvironmentTyp
     switch (type) {
     case EnvironmentSettingDialog::EnvironmentType::DESERT:
         pointLightColor=pointLightColorsDesert;
-        ClearColor=QVector3D(0.2f, 0.3f, 0.2f);
+        ClearColor=QVector3D(0.75f, 0.52f, 0.3f);
         DirLight_ambient=QVector3D(0.3f, 0.7f, 0.5f)*2;
         DirLight_diffuse=QVector3D(0.7f, 0.42f, 0.26f)*2;
         DirLight_dspecular=QVector3D(0.5f, 0.5f, 0.5f)*2;
@@ -295,21 +278,14 @@ void MyOpenglWidget::initializeGL()
     success=m_SingleColorShaderProgram.link();
     if(!success) qDebug()<<"ERR:"<<m_SingleColorShaderProgram.log();
 
-    m_DiscardShaderProgram.addShaderFromSourceFile(QOpenGLShader::Vertex,":/shader/object.vert");
-    m_DiscardShaderProgram.addShaderFromSourceFile(QOpenGLShader::Fragment,":/shader/discard.frag");
-    success=m_DiscardShaderProgram.link();
-    if(!success) qDebug()<<"ERR:"<<m_DiscardShaderProgram.log();
-
     m_ShaderProgram.addShaderFromSourceFile(QOpenGLShader::Vertex,":/shader/object.vert");
     m_ShaderProgram.addShaderFromSourceFile(QOpenGLShader::Fragment,":/shader/object.frag");
     success=m_ShaderProgram.link();
     if(!success) qDebug()<<"ERR:"<<m_ShaderProgram.log();
 
-    string relativePath="../../environment/image/blending_transparent_window.png";
-    m_blendTex=new QOpenGLTexture(QImage(relativePath.c_str()).mirrored());
-    m_grassTex=new QOpenGLTexture(QImage(relativePath.c_str()).mirrored());
     m_diffuseTex=new QOpenGLTexture(QImage(":/iamge/wall.jpg").mirrored());
     m_specularTex=new QOpenGLTexture(QImage(":/iamge/container2_specular.png").mirrored());
+    m_grassTex =new QOpenGLTexture(QImage(":/iamge/grass.png").mirrored());
     m_ShaderProgram.bind();
 
     m_LightShaderProgram.addShaderFromSourceFile(QOpenGLShader::Vertex,":/shader/light.vert");
@@ -320,24 +296,8 @@ void MyOpenglWidget::initializeGL()
     m_glfuns=QOpenGLContext::currentContext()->versionFunctions<QOpenGLFunctions_3_3_Core>();
 
     m_PlaneMesh=processMesh(&Data::verticesAndTexCoords[0],6,m_specularTex->textureId());
-
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-//    for(int i=0;i<vegetation.size();i++)
-//    {
-//        QOpenGLTexture* tex=i==0?m_blendTex:m_grassTex;
-//        Mesh* grassmesh=processMesh(&Data::verticesAndTexCoords[0],6,tex->textureId());
-//        m_grassMeshs.push_back(grassmesh);
-//    }
-
-
-      m_blendMesh=processMesh(&Data::verticesAndTexCoords[0],6,m_blendTex->textureId());
-      //m_grassMeshs.push_back(grassmesh);
-
-
     m_CubeMesh=processMesh(&Data::verticesAndTexCoords[0],36,m_diffuseTex->textureId());
     m_light=new LightBase(m_glfuns,lightColor);
-
 
     //shared_ptr<Mesh> m_shareptrMesh(m_CubeMesh);
 
@@ -348,11 +308,11 @@ void MyOpenglWidget::initializeGL()
     //m_model=new Model(m_glfuns,"E:/Git/QT/QT_Learn/QT_Opengl_Depth/backpack/backpack.obj");
     //m_camera.SetCameraPosition(cameraPosInitByModel(m_model));
 
-    //Model* m_model=new Model(m_glfuns,path.c_str());
+    Model* m_model=new Model(m_glfuns,path.c_str());
 
-    //QVector3D modelPostion=m_camera.Position+m_camera.Front*20.0f-QVector3D(0.0f,m_model->getModelHeight()*0.5,0.0f) ;
+    QVector3D modelPostion=m_camera.Position+m_camera.Front*20.0f-QVector3D(0.0f,m_model->getModelHeight()*0.5,0.0f) ;
 
-    //m_models["张三"+QString::number(-1)]=FModelInfo(m_model,modelPostion);
+    m_models["张三"+QString::number(-1)]=FModelInfo(m_model,modelPostion);
     projection.setToIdentity();
     projection.perspective(m_camera.Zoom,(float)width()/height(),_near,_far);
 }
@@ -499,11 +459,29 @@ void MyOpenglWidget::paintGL()
           if(m_CubeMesh)
           {
               model.setToIdentity();
-              model.translate(QVector3D(0,0,-5));
+              model.translate(QVector3D(0,-3,0));
               m_ShaderProgram.setUniformValue("model", model);
-
+//1.在绘制（需要添加轮廓的）物体之前，将模板函数设置为GL_ALWAYS，每当物体的片段被渲染时，将模板缓冲更新为1。
+//glStencilFunc(GL_ALWAYS,1,0xFF);
+//glStencilMask(0xFF);
+            //2.第一次渲染物体
              m_CubeMesh->Draw(m_ShaderProgram);
-
+//3.禁用模板写入以及深度测试
+//glStencilFunc(GL_NOTEQUAL,1,0xFF);
+//glStencilMask(0x00);
+             //4.将物体缩放为1.1倍
+            // model.scale(1.05f);
+             //5.使用一个不同的片段着色器，输出一个单独的（边框）颜色。
+            // m_SingleColorShaderProgram.bind();
+            // m_SingleColorShaderProgram.setUniformValue("projection", projection);
+            // m_SingleColorShaderProgram.setUniformValue("view", view);
+            // m_SingleColorShaderProgram.setUniformValue("model", model);
+             //6.再次绘制一个物体
+            // m_CubeMesh->Draw(m_SingleColorShaderProgram);
+             //m_SingleColorShaderProgram.release();
+//7.再次启用模板写入和深度测试。
+//glStencilMask(0xFF);
+//glStencilFunc(GL_ALWAYS,1,0xFF);
 
 
           }
@@ -526,6 +504,9 @@ glStencilMask(0xFF);
                 m_ShaderProgram.release();
 glStencilFunc(GL_NOTEQUAL,1,0xFF);
 glStencilMask(0x00);
+
+//float xOffset= modelInfo._model->getModelWidth()/2.0f;
+//float yOffset= modelInfo._model->getModelWidth()/2.0f;
                 model.translate(modelInfo._model->getCenterPoint());
                 model.scale(1.05f);
 
@@ -538,6 +519,9 @@ glStencilMask(0x00);
                 m_SingleColorShaderProgram.release();
 glStencilFunc(GL_ALWAYS,1,0xFF);
 glStencilMask(0xFF);
+
+
+
                 if(modelInfo._isSelected)
                 {
                     m_LightShaderProgram.bind();
@@ -562,39 +546,6 @@ glStencilMask(0xFF);
           m_LightShaderProgram.setUniformValue("view", view);
           m_light->Draw(m_LightShaderProgram);
           m_LightShaderProgram.release();
-
-
-
-
-
-          m_DiscardShaderProgram.bind();
-          m_DiscardShaderProgram.setUniformValue("projection", projection);
-          m_DiscardShaderProgram.setUniformValue("view", view);
-          //glActiveTexture(GL_TEXTURE0);
-          //m_DiscardShaderProgram.setUniformValue("texture1",0);
-          //glBindTexture(GL_TEXTURE_2D,0);
-
-          //m_DiscardShaderProgram.setUniformValue("texture1", view);
-//          for(int i=0;i<m_grassMeshs.size();i++)
-//          {
-//              model.setToIdentity();
-//              model.translate(vegetation[i]);
-//              m_DiscardShaderProgram.setUniformValue("model", model);
-//              //m_grassTex->bind(0);
-//              m_grassMeshs[i]->Draw(m_DiscardShaderProgram);
-//          }
-//透明的物体需要最后绘制,而且距离相机最远的要先绘制
-          map<float,QVector3D>::reverse_iterator iter;
-          for(iter=sorted.rbegin();iter!=sorted.rend();iter++ )
-          {
-              model.setToIdentity();
-
-              model.translate(iter->second);
-              m_DiscardShaderProgram.setUniformValue("model", model);
-              m_blendMesh->Draw(m_DiscardShaderProgram);
-          }
-
-
         break;
     }
 }

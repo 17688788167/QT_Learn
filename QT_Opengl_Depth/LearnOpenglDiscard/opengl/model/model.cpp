@@ -131,7 +131,7 @@ Mesh* Model::processMesh(aiMesh *mesh, const aiScene *scene)
         textures.insert(textures.end(),specularMaps.begin(),specularMaps.end());
     }
     //return Mesh();
-    //cout<<vertices.size()<<" "<<indices.size()<<" "<<textures.size()<<endl;
+    cout<<vertices.size()<<" "<<indices.size()<<" "<<textures.size()<<endl;
 
 
     return new Mesh(m_glFuns,vertices,indices,textures);
