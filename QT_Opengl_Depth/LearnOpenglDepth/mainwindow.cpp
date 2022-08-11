@@ -10,6 +10,8 @@ MainWindow::MainWindow(QWidget *parent) :
     setCentralWidget(ui->openGLWidget);
 
     connect(ui->openGLWidget,SIGNAL(mousePickingPos(QVector3D)),this,SLOT(getMousePickingPos(QVector3D)));
+
+    connect(ui->openGLWidget,SIGNAL(showFrame(float)),this,SLOT(getFrame(float)));
 }
 
 MainWindow::~MainWindow()
@@ -72,3 +74,11 @@ void MainWindow::getMousePickingPos(const QVector3D &pos)
     );
 
 }
+
+void MainWindow::getFrame(float frame)
+{
+    //ui->statusBar->setStyleSheet("font: 14pt ");
+   //ui->statusBar->showMessage("  fps:"+QString::number(frame,'f', 2));
+    qDebug()<<frame;
+}
+

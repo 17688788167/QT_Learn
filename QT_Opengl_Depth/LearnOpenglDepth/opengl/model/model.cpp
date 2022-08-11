@@ -1,4 +1,4 @@
-#include "model.h"
+﻿#include "model.h"
 #include <iostream>
 
 Model::Model(QOpenGLFunctions_3_3_Core *glFun,const char *path)
@@ -15,6 +15,10 @@ Model::~Model()
         delete meshes[i];
     }
     meshes.empty();
+
+    m_glFuns->glDeleteVertexArrays(1,&m_boxGLData.VAO);
+    m_glFuns->glDeleteBuffers(1, &m_boxGLData.VBO);
+    m_glFuns->glDeleteBuffers(1, &m_boxGLData.EBO);
 }
 
 void Model::Draw(QOpenGLShaderProgram &shader)

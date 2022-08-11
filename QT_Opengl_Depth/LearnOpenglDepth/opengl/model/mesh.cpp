@@ -3,7 +3,9 @@
 
 Mesh::~Mesh()
 {
-
+    m_glFuns->glDeleteVertexArrays(1,&m_gldata.VAO);
+    m_glFuns->glDeleteBuffers(1, &m_gldata.VBO);
+    m_glFuns->glDeleteBuffers(1, &m_gldata.EBO);
 }
 
 void Mesh::Draw(QOpenGLShaderProgram &shader)

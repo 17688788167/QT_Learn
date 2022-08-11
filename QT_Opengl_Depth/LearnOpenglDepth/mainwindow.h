@@ -30,6 +30,9 @@ private slots:
 
     void getMousePickingPos(const QVector3D &pos);
 
+    void getFrame(float frame);
+
+
 private:
     Ui::MainWindow *ui;
 };

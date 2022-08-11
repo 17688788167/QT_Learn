@@ -173,6 +173,9 @@ MyOpenglWidget::~MyOpenglWidget()
     }
     m_models.empty();
 
+
+
+    glDeleteFramebuffers(1,&fbo);
     doneCurrent();
 }
 
@@ -287,7 +290,8 @@ void MyOpenglWidget::initializeGL()
     //开启深度
     glEnable(GL_DEPTH_TEST);
     m_shape=Rect;
-
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
     bool success;
 
     m_SingleColorShaderProgram.addShaderFromSourceFile(QOpenGLShader::Vertex,":/shader/light.vert");
@@ -307,7 +311,7 @@ void MyOpenglWidget::initializeGL()
 
     string relativePath="../../environment/image/blending_transparent_window.png";
     m_blendTex=new QOpenGLTexture(QImage(relativePath.c_str()).mirrored());
-    m_grassTex=new QOpenGLTexture(QImage(relativePath.c_str()).mirrored());
+    m_grassTex=new QOpenGLTexture(QImage(":/iamge/grass.png").mirrored());
     m_diffuseTex=new QOpenGLTexture(QImage(":/iamge/wall.jpg").mirrored());
     m_specularTex=new QOpenGLTexture(QImage(":/iamge/container2_specular.png").mirrored());
     m_ShaderProgram.bind();
@@ -331,7 +335,7 @@ void MyOpenglWidget::initializeGL()
 //    }
 
 
-      m_blendMesh=processMesh(&Data::verticesAndTexCoords[0],6,m_blendTex->textureId());
+      m_blendMesh=processMesh(&Data::verticesAndTexCoords[0],36,m_blendTex->textureId());
       //m_grassMeshs.push_back(grassmesh);
 
 
@@ -355,6 +359,45 @@ void MyOpenglWidget::initializeGL()
     //m_models["张三"+QString::number(-1)]=FModelInfo(m_model,modelPostion);
     projection.setToIdentity();
     projection.perspective(m_camera.Zoom,(float)width()/height(),_near,_far);
+
+
+    //创建一个自定义的帧缓冲
+    glGenFramebuffers(1,&fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+
+    //创建一个纹理，并作为帧缓冲的附件
+    unsigned int texColorBuffer;
+    glGenTextures(1,&texColorBuffer);
+    glBindTexture(GL_TEXTURE_2D,texColorBuffer);
+    glTexImage2D(GL_TEXTURE_2D,0,GL_RGB,width(),height(),0,GL_RGB,GL_UNSIGNED_BYTE,NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    //将纹理绑定到当前的帧缓冲对象
+    glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_2D,texColorBuffer,0);
+
+    //创建深度和模板缓冲对象，使用渲染缓冲对象
+    glGenRenderbuffers(1,&rbo);
+    glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+
+    //指定存储在renderbuffer中的图像的宽高以及颜色格式，并按照此规格位置分配存储空间
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width(), height());
+    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+    //最后将渲染缓冲对象附加到帧缓冲的深度和模板附件上
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
+
+    if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+        std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
+
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+
+
+
+
+
 }
 
 void MyOpenglWidget::resizeGL(int w, int h)
@@ -369,13 +412,14 @@ void MyOpenglWidget::resizeGL(int w, int h)
 void MyOpenglWidget::paintGL()
 {
 
-    CurrentTime=StartTime.elapsed()/1000.0;
+    CurrentTime=StartTime.elapsed()/1000.0f;
     deltaTime=CurrentTime-lastTime;
     lastTime=CurrentTime;
 
     model.setToIdentity();
     view.setToIdentity();
 
+    showFrame(1.0f/deltaTime);
 
 
 

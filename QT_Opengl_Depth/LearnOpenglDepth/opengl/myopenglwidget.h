@@ -79,6 +79,8 @@ protected:
 
 signals:
     void mousePickingPos(const QVector3D& pos);
+
+    void showFrame(float frame);
 public slots:
     void on_timeout();
 private:
@@ -127,6 +129,9 @@ private:
     QVector3D cameraPosInitByModel(Model *model);
 
     QVector4D worldPosFromViewPort(int posX,int posY);
+
+
+    unsigned int fbo,rbo;
 };
 
 #endif // MYOPENGLWIDGET_H
