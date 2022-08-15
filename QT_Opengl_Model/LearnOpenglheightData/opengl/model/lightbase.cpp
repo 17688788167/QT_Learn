@@ -1,5 +1,5 @@
 #include "lightbase.h"
-#include<QDebug>
+
 
 LightBase::LightBase(QOpenGLFunctions_3_3_Core *glfun, const QVector3D &light)
 {
@@ -13,8 +13,8 @@ void LightBase::Draw(QOpenGLShaderProgram &shader)
 {
         shader.setUniformValue("lightColor",m_lightColor);
         m_glFuns->glBindVertexArray(m_gldata.VAO);
-
         m_glFuns->glDrawArrays(GL_TRIANGLES, 0, 36);
+        //qDebug()<<&m_gldata.VAO<<"  sssss";
 }
 
 void LightBase::setupMesh()

@@ -27,7 +27,6 @@ void Mesh::Draw(QOpenGLShaderProgram &shader)
         m_glFuns->glBindTexture(GL_TEXTURE_2D,m_textures[i].id);
     }
     m_glFuns->glBindVertexArray(m_gldata.VAO);
-
     m_glFuns->glDrawElements(GL_TRIANGLES,m_indices.size(),GL_UNSIGNED_INT,0);
 }
 
