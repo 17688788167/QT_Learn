@@ -11,6 +11,8 @@ void Mesh::Draw(QOpenGLShaderProgram &shader)
     //绑定贴图
     unsigned int diffuseNr=1;
     unsigned int specularNr=1;
+    unsigned int reflectionNr=1;
+
     for(unsigned int i=0;i<m_textures.size();++i)
     {
         m_glFuns->glActiveTexture(GL_TEXTURE0+i);
@@ -22,6 +24,9 @@ void Mesh::Draw(QOpenGLShaderProgram &shader)
             number=std::to_string(diffuseNr++);
         else if(name=="texture_specular")
             number=std::to_string(specularNr++);
+        else if(name=="texture_reflection")
+            number=std::to_string(reflectionNr++);
+
 
         shader.setUniformValue(("material."+name+number).c_str(),i);
         m_glFuns->glBindTexture(GL_TEXTURE_2D,m_textures[i].id);

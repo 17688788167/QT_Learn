@@ -354,6 +354,7 @@ void MyOpenglWidget::paintGL()
 
               reflectCube->Draw(reflectionShaderProgram);
              // cubeMesh->Draw(reflectionShaderProgram);
+
               if(m_model)
               m_model->Draw(reflectionShaderProgram);
               //reflectionShaderProgram.setUniformValue("skybox",3);

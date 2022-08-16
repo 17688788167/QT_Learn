@@ -11,6 +11,8 @@ void Mesh::Draw(QOpenGLShaderProgram &shader)
     //绑定贴图
     unsigned int diffuseNr=1;
     unsigned int specularNr=1;
+    unsigned int reflectionNr=1;
+
     for(unsigned int i=0;i<m_textures.size();++i)
     {
         m_glFuns->glActiveTexture(GL_TEXTURE0+i);
@@ -22,11 +24,15 @@ void Mesh::Draw(QOpenGLShaderProgram &shader)
             number=std::to_string(diffuseNr++);
         else if(name=="texture_specular")
             number=std::to_string(specularNr++);
+        else if(name=="texture_reflection")
+            number=std::to_string(reflectionNr++);
+
 
         shader.setUniformValue(("material."+name+number).c_str(),i);
         m_glFuns->glBindTexture(GL_TEXTURE_2D,m_textures[i].id);
     }
     m_glFuns->glBindVertexArray(m_gldata.VAO);
+
     m_glFuns->glDrawElements(GL_TRIANGLES,m_indices.size(),GL_UNSIGNED_INT,0);
 }
 
@@ -56,13 +62,13 @@ void Mesh::setupMesh()
     m_glFuns->glBindVertexArray(m_gldata.VAO);
     m_glFuns->glBindBuffer(GL_ARRAY_BUFFER, m_gldata.VBO);
 
-    void * ptr=m_glFuns->glMapBuffer(GL_ARRAY_BUFFER,GL_WRITE_ONLY);
-    std::memcpy(ptr,&m_vertices[0],sizeof(Vertex)*m_vertices.size());
+
+    m_glFuns->glBufferData(GL_ARRAY_BUFFER,sizeof(Vertex)*m_vertices.size() ,NULL, GL_STATIC_DRAW);
+
+    void *ptr=m_glFuns->glMapBuffer(GL_ARRAY_BUFFER,GL_WRITE_ONLY);
+    std::memcpy(ptr,&m_vertices[0],sizeof(Vertex)*m_vertices.size()/2 );
     m_glFuns->glUnmapBuffer(GL_ARRAY_BUFFER);
 
-    //m_glFuns->glBufferData(GL_ARRAY_BUFFER,sizeof(Vertex)*m_vertices.size() ,&m_vertices[0], GL_STATIC_DRAW);
-
-    //m_glFuns->glBufferData(GL_ARRAY_BUFFER,sizeof(Vertex)*m_vertices.size() ,&m_vertices[0], GL_STATIC_DRAW);
 
     m_glFuns->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,m_gldata.EBO);
 
