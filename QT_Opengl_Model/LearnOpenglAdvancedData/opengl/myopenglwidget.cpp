@@ -3,6 +3,7 @@
 #include "QDebug"
 #include <QVector3D>
 #include <QtMath>
+#define QMatrix4x4DataSize 64
 
 QVector3D lightPos(1.2f, 1.0f, 2.0f);
 QVector3D objectPos(-1.7f, 3.0f, -7.5f);
@@ -241,7 +242,7 @@ void MyOpenglWidget::initializeGL()
     initializeOpenGLFunctions();
     //开始计时
     StartTime.start();
-
+glEnable(GL_PROGRAM_POINT_SIZE);
 
     //开启透明度
     //glEnable(GL_BLEND);
@@ -268,6 +269,27 @@ void MyOpenglWidget::initializeGL()
         reflectCube=new LightBase(m_glfuns,lightColor);
     cubeMesh=processMesh(&Data::verticesAndTexCoords[0],36,m_diffuseTex->textureId());
     genSkyBoxVAOandVBO();
+
+
+
+    unsigned int uniformBlockIndexShader  = glGetUniformBlockIndex(m_ShaderProgram.programId(), "Matrices");
+    unsigned int uniformBlockIndexlightShader  = glGetUniformBlockIndex(m_LightShaderProgram.programId(), "Matrices");
+    unsigned int uniformBlockIndexreflectionShader  = glGetUniformBlockIndex(reflectionShaderProgram.programId(), "Matrices");
+    unsigned int uniformBlockIndexskyShader  = glGetUniformBlockIndex(skyshaderProgram.programId(), "Matrices");
+
+    glUniformBlockBinding(m_ShaderProgram.programId(),    uniformBlockIndexShader, 0);
+    glUniformBlockBinding(m_LightShaderProgram.programId(),  uniformBlockIndexlightShader, 0);
+    glUniformBlockBinding(reflectionShaderProgram.programId(),   uniformBlockIndexreflectionShader, 0);
+    glUniformBlockBinding(skyshaderProgram.programId(), uniformBlockIndexskyShader, 0);
+
+
+    glGenBuffers(1, &uboMatrices);
+    glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
+    glBufferData(GL_UNIFORM_BUFFER, 2 * QMatrix4x4DataSize, NULL, GL_STATIC_DRAW);
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+    glBindBufferRange(GL_UNIFORM_BUFFER, 0, uboMatrices, 0, 2 * QMatrix4x4DataSize);
+
 }
 
 void MyOpenglWidget::resizeGL(int w, int h)
@@ -315,6 +337,13 @@ void MyOpenglWidget::paintGL()
 
     view=m_camera.GetViewMatrix();
     projection.perspective(m_camera.Zoom,(float)width()/height(),0.1f,1000);
+    glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
+    glBufferSubData(GL_UNIFORM_BUFFER, 0, QMatrix4x4DataSize,  projection.constData());
+    glBufferSubData(GL_UNIFORM_BUFFER, QMatrix4x4DataSize, QMatrix4x4DataSize, view.constData());
+
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+
 
     glClearColor(ClearColor.x(),ClearColor.y(),ClearColor.z(), 1.0f);
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
@@ -326,8 +355,8 @@ void MyOpenglWidget::paintGL()
             m_ShaderProgram.bind();
 
          // m_mesh->Draw(m_ShaderProgram,this);
-          m_ShaderProgram.setUniformValue("projection", projection);
-          m_ShaderProgram.setUniformValue("view", view);
+
+
          // model.rotate(CurrentTime*10, 1.0f, 1.0f, 0.5f);
           m_ShaderProgram.setUniformValue("viewPos",m_camera.Position);
 
@@ -347,8 +376,8 @@ void MyOpenglWidget::paintGL()
           if(cubeMesh)
           {
               reflectionShaderProgram.bind();
-              reflectionShaderProgram.setUniformValue("projection", projection);
-              reflectionShaderProgram.setUniformValue("view", view);
+
+
               reflectionShaderProgram.setUniformValue("model", model);
               reflectionShaderProgram.setUniformValue("viewPos",m_camera.Position);
 
@@ -377,8 +406,6 @@ void MyOpenglWidget::paintGL()
           //glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
 
           m_LightShaderProgram.bind();
-          m_LightShaderProgram.setUniformValue("projection", projection);
-          m_LightShaderProgram.setUniformValue("view", view);
            m_LightShaderProgram.setUniformValue("model", model);
 
            if(m_model)
@@ -401,8 +428,7 @@ void MyOpenglWidget::paintGL()
           skyshaderProgram.bind();
           QMatrix4x4 skyboxView=view;// remove translation from the view matrix
           skyboxView.setColumn(3,QVector4D(0.0f,0.0f,0.0f,1.0f));
-          skyshaderProgram.setUniformValue("projection", projection);
-          skyshaderProgram.setUniformValue("view", skyboxView);
+          skyshaderProgram.setUniformValue("skyView", skyboxView);
           // skybox cube
           glBindVertexArray(skyVAO);
           glActiveTexture(GL_TEXTURE0);

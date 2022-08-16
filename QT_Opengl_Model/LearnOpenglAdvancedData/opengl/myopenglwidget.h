@@ -126,7 +126,7 @@ private:
     void genSkyBoxVAOandVBO();
 
 
-
+unsigned int uboMatrices;
 
 };
 

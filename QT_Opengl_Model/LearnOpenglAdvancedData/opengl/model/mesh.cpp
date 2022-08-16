@@ -32,7 +32,7 @@ void Mesh::Draw(QOpenGLShaderProgram &shader)
         m_glFuns->glBindTexture(GL_TEXTURE_2D,m_textures[i].id);
     }
     m_glFuns->glBindVertexArray(m_gldata.VAO);
-
+   // m_glFuns->glDrawElements(GL_POINTS,m_indices.size(),GL_UNSIGNED_INT,0);
     m_glFuns->glDrawElements(GL_TRIANGLES,m_indices.size(),GL_UNSIGNED_INT,0);
 }
 
@@ -66,7 +66,7 @@ void Mesh::setupMesh()
     m_glFuns->glBufferData(GL_ARRAY_BUFFER,sizeof(Vertex)*m_vertices.size() ,NULL, GL_STATIC_DRAW);
 
     void *ptr=m_glFuns->glMapBuffer(GL_ARRAY_BUFFER,GL_WRITE_ONLY);
-    std::memcpy(ptr,&m_vertices[0],sizeof(Vertex)*m_vertices.size()/2 );
+    std::memcpy(ptr,&m_vertices[0],sizeof(Vertex)*m_vertices.size());
     m_glFuns->glUnmapBuffer(GL_ARRAY_BUFFER);
 
 
