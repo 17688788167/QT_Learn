@@ -17,6 +17,7 @@
 #include "model.h"
 #include "lightbase.h"
 #include "geometry.h"
+#include "screen.h"
 
 class Light;
 class MyOpenglWidget : public QOpenGLWidget,QOpenGLFunctions_3_3_Core
@@ -92,6 +93,8 @@ private:
     QOpenGLShaderProgram geometryShaderProgram;
     QOpenGLShaderProgram explodeShaderProgram;
     QOpenGLShaderProgram showNormalShaderProgram;
+    QOpenGLShaderProgram screenShaderProgram;
+
 
     unsigned int VAO,VBO,EBO;
     QOpenGLTexture * textureWall;
@@ -114,6 +117,8 @@ private:
 
     LightBase* reflectCube;
     Geometry* geometry;
+
+    Screen* screen;
 
     Mesh* processMesh();
     Mesh* processMesh(const float *vertices,int size,unsigned int textureId);

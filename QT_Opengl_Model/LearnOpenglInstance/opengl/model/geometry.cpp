@@ -38,4 +38,11 @@ void Geometry::setupMesh()
     m_glFuns->glEnableVertexAttribArray(1);
 
     m_glFuns->glBindVertexArray(0);
+
+
+}
+
+void Geometry::Draw()
+{
+
 }

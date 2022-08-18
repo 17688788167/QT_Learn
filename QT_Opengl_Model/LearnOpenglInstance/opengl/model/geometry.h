@@ -12,6 +12,7 @@ public:
 
     virtual void Draw(QOpenGLShaderProgram &shader) override;
     virtual void setupMesh() override;
+    virtual void Draw()override;
 };
 
 #endif // GEOMETRY_H

@@ -10,13 +10,19 @@ public:
 
     FGLData m_gldata;
     QOpenGLFunctions_3_3_Core * m_glFuns;
+    QOpenGLShaderProgram * m_glShader;
     IGLBase(QOpenGLFunctions_3_3_Core* glfun)
     {
         this->m_glFuns=glfun;
-        //setupMesh();
+    }
+    IGLBase(QOpenGLFunctions_3_3_Core* glfun,QOpenGLShaderProgram*glShader)
+    {
+        this->m_glFuns=glfun;
+        this->m_glShader=glShader;
     }
     virtual void setupMesh()=0;
     virtual void Draw(QOpenGLShaderProgram &shader)=0;
+    virtual void Draw()=0;
 };
 
 #endif // IGLBASE_H

@@ -20,5 +20,7 @@
         <file>displaynormal.vert</file>
         <file>instance.frag</file>
         <file>instance.vert</file>
+        <file>instanceArray.frag</file>
+        <file>instanceArray.vert</file>
     </qresource>
 </RCC>

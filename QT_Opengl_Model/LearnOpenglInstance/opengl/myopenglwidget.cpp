@@ -251,6 +251,8 @@ void MyOpenglWidget::initializeGL()
     //开启深度
     glEnable(GL_DEPTH_TEST);
     m_shape=Rect;
+
+    genShader(screenShaderProgram,":/shader/instanceArray.vert",":/shader/instanceArray.frag");
     genShader(showNormalShaderProgram,":/shader/displaynormal.vert",":/shader/displaynormal.frag",":/shader/displaynormal.geom");
     genShader(explodeShaderProgram,":/shader/explode.vert",":/shader/explode.frag",":/shader/explode.geom");
     genShader(geometryShaderProgram,":/shader/point.vert",":/shader/point.frag",":/shader/point.geom");
@@ -273,6 +275,8 @@ void MyOpenglWidget::initializeGL()
     genSkyBoxVAOandVBO();
 
     geometry=new Geometry(m_glfuns);
+    screen=new Screen(m_glfuns,&screenShaderProgram);
+
 
     unsigned int uniformBlockIndexShowNormalShader  = glGetUniformBlockIndex(showNormalShaderProgram.programId(), "Matrices");
     unsigned int uniformBlockIndexExplodeShader  = glGetUniformBlockIndex(explodeShaderProgram.programId(), "Matrices");
@@ -374,9 +378,6 @@ void MyOpenglWidget::paintGL()
           glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
 
 
-          if(m_mesh)
-          //m_mesh->Draw(m_ShaderProgram);
-
 
 
           if(cubeMesh)
@@ -419,8 +420,9 @@ void MyOpenglWidget::paintGL()
 
           //glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
 
-          m_LightShaderProgram.bind();
+           m_LightShaderProgram.bind();
            m_LightShaderProgram.setUniformValue("model", model);
+
 
            if(m_model)
            {
@@ -436,6 +438,8 @@ void MyOpenglWidget::paintGL()
           //m_lightMesh->Draw(m_LightShaderProgram);
           m_light->Draw(m_LightShaderProgram);
 
+
+          screen->Draw();
            // geometry->Draw(geometryShaderProgram);
 
           // draw skybox as last
