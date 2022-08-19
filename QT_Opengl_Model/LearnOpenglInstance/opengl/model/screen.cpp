@@ -47,15 +47,17 @@ void Screen::setupMesh()
 
 
 //    m_glFuns->glBufferSubData(GL_ARRAY_BUFFER,sizeof(Data::vertices)/2,sizeof(Data::vertices)/2,&Data::vertices[sizeof(Data::vertices)/2/sizeof(float)]);
-    m_glFuns->glEnableVertexAttribArray(0);
+
     m_glFuns->glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 5*sizeof(float), (void*)0);
-    m_glFuns->glEnableVertexAttribArray(1);
+    m_glFuns->glEnableVertexAttribArray(0);
+
     m_glFuns->glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 5*sizeof(float), (void*)(sizeof(float)*2));
-   // m_glFuns->glEnableVertexAttribArray(2);
+    m_glFuns->glEnableVertexAttribArray(1);
 
 
 
-
+    if(m_glShader==nullptr)
+        return;
 
 
 
@@ -67,8 +69,7 @@ void Screen::setupMesh()
       m_glFuns->glVertexAttribDivisor(2, 1);
 
 
-//      if(m_glShader==nullptr)
-//          return;
+  m_glFuns->glBindVertexArray(0);
 
       //m_glShader->bind();
 //    for(unsigned int i=0;i<100;i++)

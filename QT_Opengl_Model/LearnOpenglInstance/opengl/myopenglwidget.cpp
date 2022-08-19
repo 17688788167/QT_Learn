@@ -414,7 +414,8 @@ void MyOpenglWidget::paintGL()
 
                 showNormalShaderProgram.bind();
                 showNormalShaderProgram.setUniformValue("model",model);
-                m_model->Draw(showNormalShaderProgram);
+                m_ShaderProgram.bind();
+                m_model->Draw(m_ShaderProgram);
           }
 
 
