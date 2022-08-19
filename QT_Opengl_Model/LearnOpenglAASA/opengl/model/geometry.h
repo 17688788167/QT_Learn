@@ -1,11 +1,11 @@
-#ifndef TRIANGLE_H
-#define TRIANGLE_H
+#ifndef GEOMETRY_H
+#define GEOMETRY_H
 #include "iglbase.h"
 
-class Trianglea:public IGLBase
+class Geometry:public IGLBase
 {
 public:
-    Trianglea(QOpenGLFunctions_3_3_Core* glfun):IGLBase(glfun)
+    Geometry(QOpenGLFunctions_3_3_Core * glfun):IGLBase(glfun)
     {
         setupMesh();
     }
@@ -13,9 +13,6 @@ public:
     virtual void Draw(QOpenGLShaderProgram &shader) override;
     virtual void setupMesh() override;
     virtual void Draw()override;
-
-
-
 };
 
-#endif // TRIANGLE_H
+#endif // GEOMETRY_H

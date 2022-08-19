@@ -1,0 +1,28 @@
+<RCC>
+    <qresource prefix="/shader">
+        <file>light.frag</file>
+        <file>light.vert</file>
+        <file>object.frag</file>
+        <file>object.vert</file>
+        <file>skybox.frag</file>
+        <file>skybox.vert</file>
+        <file>reflection.frag</file>
+        <file>reflection.vert</file>
+        <file>point.frag</file>
+        <file>point.vert</file>
+        <file>point.geom</file>
+        <file>explode.frag</file>
+        <file>explode.geom</file>
+        <file>explode.vert</file>
+        <file>explode_test.frag</file>
+        <file>displaynormal.geom</file>
+        <file>displaynormal.frag</file>
+        <file>displaynormal.vert</file>
+        <file>instance.frag</file>
+        <file>instance.vert</file>
+        <file>instanceArray.frag</file>
+        <file>instanceArray.vert</file>
+        <file>triangle.frag</file>
+        <file>triangle.vert</file>
+    </qresource>
+</RCC>
