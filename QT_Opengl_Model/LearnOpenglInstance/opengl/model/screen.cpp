@@ -54,7 +54,7 @@ void Screen::setupMesh()
     m_glFuns->glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 5*sizeof(float), (void*)(sizeof(float)*2));
     m_glFuns->glEnableVertexAttribArray(1);
 
-    m_glFuns->glBindVertexArray(0);
+
 
     if(m_glShader==nullptr)
         return;
@@ -69,7 +69,7 @@ void Screen::setupMesh()
       m_glFuns->glVertexAttribDivisor(2, 1);
 
 
-
+  m_glFuns->glBindVertexArray(0);
 
       //m_glShader->bind();
 //    for(unsigned int i=0;i<100;i++)
