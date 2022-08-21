@@ -6,5 +6,10 @@
         <file>object.vert</file>
         <file>singleColor.frag</file>
         <file>discard.frag</file>
+        <file>screen.frag</file>
+        <file>screen.vert</file>
+        <file>shaders.qrc</file>
+        <file>skybox.frag</file>
+        <file>skybox.vert</file>
     </qresource>
 </RCC>

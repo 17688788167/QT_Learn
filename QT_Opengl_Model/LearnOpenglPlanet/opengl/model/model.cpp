@@ -26,6 +26,15 @@ void Model::Draw(QOpenGLShaderProgram &shader)
     }
 }
 
+void Model::DrawInstance(QOpenGLShaderProgram &shader, unsigned int amount)
+{
+    for(unsigned int i =0;i<meshes.size();i++)
+    {
+       // qDebug()<<directory.c_str();
+        meshes[i]->DrawInstance(shader,amount);
+    }
+}
+
 void Model::loadModel(string path)
 {
     Assimp::Importer import;

@@ -17,10 +17,11 @@ Model(QOpenGLFunctions_3_3_Core* glFun,const char *path);
 ~Model();
 
 void Draw(QOpenGLShaderProgram &shader);
+void DrawInstance(QOpenGLShaderProgram &shader,unsigned int amount);
 
 private:
 QOpenGLFunctions_3_3_Core *m_glFuns;
-
+public:
 
 vector<Mesh*>meshes;
 

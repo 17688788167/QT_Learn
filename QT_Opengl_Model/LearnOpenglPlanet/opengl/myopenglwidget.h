@@ -18,6 +18,11 @@
 #include "lightbase.h"
 #include "geometry.h"
 #include "screen.h"
+#include "planet.h"
+#include <QOpenGLFramebufferObject>
+#include <QOpenGLBuffer>
+#include <QOpenGLFramebufferObjectFormat>
+#include "framebuffer.h"
 
 class Light;
 class MyOpenglWidget : public QOpenGLWidget,QOpenGLFunctions_3_3_Core
@@ -58,10 +63,10 @@ public:
 
 
     QVector3D ClearColor;
-    QVector3D DirLight_ambient;
+     QVector3D DirLight_ambient;
     QVector3D DirLight_diffuse;
     QVector3D DirLight_dspecular;
-Camera m_camera;
+ Camera m_camera;
 
 protected:
     virtual void initializeGL();
@@ -94,7 +99,7 @@ private:
     QOpenGLShaderProgram explodeShaderProgram;
     QOpenGLShaderProgram showNormalShaderProgram;
     QOpenGLShaderProgram screenShaderProgram;
-
+    QOpenGLShaderProgram rockShaderProgram;
 
     unsigned int VAO,VBO,EBO;
     QOpenGLTexture * textureWall;
@@ -107,12 +112,18 @@ private:
     QOpenGLTexture * m_diffuseTex;
     QOpenGLTexture * m_specularTex;
     QOpenGLTexture * m_emissionTex;
+
+
     QOpenGLFunctions_3_3_Core * m_glfuns;
 
     Mesh* m_mesh;
+
+    Mesh* plane;
     Model* m_model=NULL;
     Model *planet=NULL;
      Model *rock=NULL;
+    Planet* rocks=NULL;
+frameBuffer* frame;
     Mesh* cubeMesh;
     LightBase* m_light;
 
@@ -120,19 +131,27 @@ private:
     Geometry* geometry;
 
     Screen* screen;
-
+public:
     Mesh* processMesh();
     Mesh* processMesh(const float *vertices,int size,unsigned int textureId);
     QVector3D cameraPosInitByModel(Model *model);
 
-    void genShader(QOpenGLShaderProgram& shader,const QString &vertFile,const QString &fragFile);
-    void genShader(QOpenGLShaderProgram& shader,const QString &vertFile,const QString &fragFile,const QString &geomFile);
+    static void genShader(QOpenGLShaderProgram& shader,const QString &vertFile,const QString &fragFile);
+    static void genShader(QOpenGLShaderProgram& shader,const QString &vertFile,const QString &fragFile,const QString &geomFile);
     void setObjectShader();
+
+    void setShaderLight(QOpenGLShaderProgram& shader);
 
     unsigned int skyVAO,skyVBO;
     QOpenGLShaderProgram skyshaderProgram;
     QOpenGLTexture * skyTexture;
     void genSkyBoxVAOandVBO();
+
+
+    unsigned int fboMultiSample;
+    unsigned int rboMultiSample;
+    unsigned int multiSampleTex;
+    void MultiFrameBuffer();
 
 
 unsigned int uboMatrices;

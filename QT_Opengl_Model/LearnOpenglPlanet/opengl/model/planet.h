@@ -9,14 +9,16 @@ class Planet: public IGLBase
 public:
     Planet(QOpenGLFunctions_3_3_Core* glFuns):IGLBase(glFuns)
     {
-
+        setupMesh();
     }
 
     virtual void setupMesh() override;
     virtual void Draw(QOpenGLShaderProgram &shader)override;
     virtual void Draw()override;
 
-    unsigned int amount=10000;
+
+    void Draw(QOpenGLShaderProgram &planetShader,QOpenGLShaderProgram &rockShader);
+    unsigned int amount=50000;
     QMatrix4x4 *modelMatrices;
 
     Model* planet;

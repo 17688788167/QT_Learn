@@ -22,5 +22,9 @@
         <file>instance.vert</file>
         <file>instanceArray.frag</file>
         <file>instanceArray.vert</file>
+        <file>rock.frag</file>
+        <file>rock.vert</file>
+        <file>screen.frag</file>
+        <file>screen.vert</file>
     </qresource>
 </RCC>

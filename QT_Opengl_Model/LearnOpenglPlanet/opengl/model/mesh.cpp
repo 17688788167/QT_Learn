@@ -36,6 +36,39 @@ void Mesh::Draw(QOpenGLShaderProgram &shader)
     m_glFuns->glDrawElements(GL_TRIANGLES,m_indices.size(),GL_UNSIGNED_INT,0);
 }
 
+void Mesh::DrawInstance(QOpenGLShaderProgram &shader,unsigned int amount)
+{
+    //绑定贴图
+    unsigned int diffuseNr=1;
+    unsigned int specularNr=1;
+    unsigned int reflectionNr=1;
+
+    for(unsigned int i=0;i<m_textures.size();++i)
+    {
+        m_glFuns->glActiveTexture(GL_TEXTURE0+i);
+        string number;
+        string name=m_textures[i].type;
+
+
+        if(name=="texture_diffuse")
+            number=std::to_string(diffuseNr++);
+        else if(name=="texture_specular")
+            number=std::to_string(specularNr++);
+        else if(name=="texture_reflection")
+            number=std::to_string(reflectionNr++);
+
+
+        shader.setUniformValue(("material."+name+number).c_str(),i);
+        m_glFuns->glBindTexture(GL_TEXTURE_2D,m_textures[i].id);
+    }
+
+
+    m_glFuns->glBindVertexArray(m_gldata.VAO);
+    m_glFuns->glDrawArraysInstanced(GL_TRIANGLES, 0,m_vertices.size(),amount );
+   // m_glFuns->glDrawElements(GL_POINTS,m_indices.size(),GL_UNSIGNED_INT,0);
+   // m_glFuns->glDrawElements(GL_TRIANGLES,m_indices.size(),GL_UNSIGNED_INT,0);
+}
+
 Mesh::Mesh(QOpenGLFunctions_3_3_Core *glFun, vector<Vertex> vertices, vector<unsigned int> indices, vector<Texture> textures)
 {
 

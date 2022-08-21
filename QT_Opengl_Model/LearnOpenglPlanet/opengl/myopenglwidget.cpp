@@ -1,4 +1,4 @@
-#include "myopenglwidget.h"
+﻿#include "myopenglwidget.h"
 
 #include "QDebug"
 #include <QVector3D>
@@ -117,6 +117,10 @@ MyOpenglWidget::MyOpenglWidget(QWidget *parent) : QOpenGLWidget(parent)
     SetEnvironmentType(EnvironmentSettingDialog::EnvironmentType::DESERT);
     connect(&timer,SIGNAL(timeout()),this,SLOT(on_timeout()));
     timer.start(10);
+
+    QSurfaceFormat format;
+    format.setSamples(4);
+    setFormat(format);
 }
 
 MyOpenglWidget::~MyOpenglWidget()
@@ -178,9 +182,9 @@ void MyOpenglWidget::LoadModel(string path)
         m_model=nullptr;
     }
     makeCurrent();
-    m_model=new Model(m_glfuns,"E:/Git/QT/QT_Learn/QT_Opengl_Model/LearnOpenglInstance/model/planet/planet.obj");
+    //m_model=new Model(m_glfuns,"E:/Git/QT/QT_Learn/QT_Opengl_Model/LearnOpenglInstance/model/planet/planet.obj");
 
-   //m_model=new Model(m_glfuns,path.c_str());
+    m_model=new Model(m_glfuns,path.c_str());
     qDebug()<<"路径:"<<path.c_str();
     m_camera.SetCameraPosition(cameraPosInitByModel(m_model));
     doneCurrent();
@@ -255,6 +259,7 @@ void MyOpenglWidget::initializeGL()
     glEnable(GL_DEPTH_TEST);
     m_shape=Rect;
 
+    genShader(rockShaderProgram,":/shader/rock.vert",":/shader/rock.frag");
     genShader(screenShaderProgram,":/shader/instanceArray.vert",":/shader/instanceArray.frag");
     genShader(showNormalShaderProgram,":/shader/displaynormal.vert",":/shader/displaynormal.frag",":/shader/displaynormal.geom");
     genShader(explodeShaderProgram,":/shader/explode.vert",":/shader/explode.frag",":/shader/explode.geom");
@@ -281,6 +286,8 @@ void MyOpenglWidget::initializeGL()
     screen=new Screen(m_glfuns,&screenShaderProgram);
 
 
+
+    unsigned int uniformBlockIndexRockShader  = glGetUniformBlockIndex(rockShaderProgram.programId(), "Matrices");
     unsigned int uniformBlockIndexShowNormalShader  = glGetUniformBlockIndex(showNormalShaderProgram.programId(), "Matrices");
     unsigned int uniformBlockIndexExplodeShader  = glGetUniformBlockIndex(explodeShaderProgram.programId(), "Matrices");
     unsigned int uniformBlockIndexShader  = glGetUniformBlockIndex(m_ShaderProgram.programId(), "Matrices");
@@ -288,6 +295,8 @@ void MyOpenglWidget::initializeGL()
     unsigned int uniformBlockIndexreflectionShader  = glGetUniformBlockIndex(reflectionShaderProgram.programId(), "Matrices");
     unsigned int uniformBlockIndexskyShader  = glGetUniformBlockIndex(skyshaderProgram.programId(), "Matrices");
 
+
+    glUniformBlockBinding(rockShaderProgram.programId(), uniformBlockIndexRockShader, 0);
     glUniformBlockBinding(showNormalShaderProgram.programId(), uniformBlockIndexShowNormalShader, 0);
     glUniformBlockBinding(explodeShaderProgram.programId(), uniformBlockIndexExplodeShader, 0);
     glUniformBlockBinding(m_ShaderProgram.programId(),    uniformBlockIndexShader, 0);
@@ -303,9 +312,14 @@ void MyOpenglWidget::initializeGL()
 
     glBindBufferRange(GL_UNIFORM_BUFFER, 0, uboMatrices, 0, 2 * QMatrix4x4DataSize);
 
+    //string path="../LearnOpenglInstance/model/planet/planet.obj";
+    //planet=new Model(m_glfuns,path.c_str());
+    //rock=new Model(m_glfuns,"D:/qt/QT_Opengl/QT_Opengl_Model/LearnOpenglPlanet/model/rock/rock.obj");
+    rocks=new Planet(m_glfuns);
 
-    planet=new Model(m_glfuns,"E:/Git/QT/QT_Learn/QT_Opengl_Model/LearnOpenglInstance/model/planet/planet.obj");
-    rock=new Model(m_glfuns,"E:/Git/QT/QT_Learn/QT_Opengl_Model/LearnOpenglInstance/model/rock/rock.obj");
+    plane=processMesh(Data::planeVertices,3,m_diffuseTex->textureId());
+
+    frame=new frameBuffer(m_glfuns,this);
 }
 
 
@@ -321,6 +335,8 @@ void MyOpenglWidget::paintGL()
     CurrentTime=StartTime.elapsed()/1000.0;
     deltaTime=CurrentTime-lastTime;
     lastTime=CurrentTime;
+
+    qDebug()<<1/deltaTime;
 
     QMatrix4x4 model;
     QMatrix4x4 view;
@@ -360,9 +376,12 @@ void MyOpenglWidget::paintGL()
 
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
+    // first pass
+    glBindFramebuffer(GL_FRAMEBUFFER, fboMultiSample);
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
 
-
-    glClearColor(ClearColor.x(),ClearColor.y(),ClearColor.z(), 1.0f);
+    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
 
@@ -370,19 +389,23 @@ void MyOpenglWidget::paintGL()
     case Rect:
     glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
 
-
+frame->paintFbo();
             setObjectShader();
+            setShaderLight(rockShaderProgram);
             model.setToIdentity();
             m_ShaderProgram.setUniformValue("model", model);
 
             m_ShaderProgram.bind();
-            if(planet)
-            planet->Draw(m_ShaderProgram);
+            plane->Draw(m_ShaderProgram);
+            //if(planet)
+           // planet->Draw(m_ShaderProgram);
             m_ShaderProgram.bind();
             model.translate(10,10,0);
             m_ShaderProgram.setUniformValue("model", model);
-            if(rock)
-             rock->Draw(m_ShaderProgram);
+            //if(rock)
+             //rock->Draw(m_ShaderProgram);
+
+            rocks->Draw(m_ShaderProgram,rockShaderProgram);
 
           if(cubeMesh)
           {
@@ -415,33 +438,16 @@ void MyOpenglWidget::paintGL()
 
           model.setToIdentity();
           model.translate(lightPos);
-          model.rotate(1.0f, 1.0f, 1.0f, 0.5f);
-          model.scale(0.2f);
+          model.rotate(45.0f, 1.0f, 1.0f, 0.5f);
+          model.scale(2.0f);
           m_LightShaderProgram.setUniformValue("model", model);
           //m_LightShaderProgram.setUniformValue("lightColor",pointLightColor[0]);
           //m_lightMesh->Draw(m_LightShaderProgram);
           m_light->Draw(m_LightShaderProgram);
 
 
-         // screen->Draw();
-           // geometry->Draw(geometryShaderProgram);
+frame->paintScreen();
 
-          // draw skybox as last
-          glDepthFunc(GL_LEQUAL); // 确保天空盒=1也能通过测试
-          skyshaderProgram.bind();
-          QMatrix4x4 skyboxView=view;// remove translation from the view matrix
-          skyboxView.setColumn(3,QVector4D(0.0f,0.0f,0.0f,1.0f));
-          skyshaderProgram.setUniformValue("skyView", skyboxView);
-          // skybox cube
-          glBindVertexArray(skyVAO);
-          glActiveTexture(GL_TEXTURE0);
-          glBindTexture(GL_TEXTURE_CUBE_MAP, skyTexture->textureId());
-
-          //m_ShaderProgram.setUniformValue("skybox",3);
-          glDrawArrays(GL_TRIANGLES, 0, 36);
-          glBindVertexArray(0);
-          glDepthFunc(GL_LESS); // set depth function back to default
-          skyshaderProgram.release();
 
         break;
     }
@@ -717,6 +723,59 @@ void MyOpenglWidget::setObjectShader()
                                       m_ShaderProgram.setUniformValue("material.shininess", 32.0f);
 }
 
+void MyOpenglWidget::setShaderLight(QOpenGLShaderProgram &shader)
+{
+    shader.bind();
+    shader.setUniformValue("light.ambient", 0.4f, 0.4f, 0.4f);
+    shader.setUniformValue("light.diffuse", 0.9f, 0.9f, 0.9f);
+    shader.setUniformValue("light.specular", 1.0f, 1.0f, 1.0f);
+
+
+    //方向光
+    shader.setUniformValue("directlight.direction",-0.2f, -1.0f, -0.3f);
+    shader.setUniformValue("directlight.ambient",DirLight_ambient);
+    shader.setUniformValue("directlight.diffuse",DirLight_diffuse);
+    shader.setUniformValue("directlight.specular", DirLight_dspecular);
+
+                    //聚光灯
+                    shader.setUniformValue("spotlight.position",m_camera.Position);
+                    shader.setUniformValue("spotlight.direction",m_camera.Front);
+                    shader.setUniformValue("spotlight.cutOff",(float)cos(17.5f*PI/180));
+                   shader.setUniformValue("spotlight.cutOn",(float)cos(12.5f*PI/180));
+
+                   shader.setUniformValue("spotlight.ambient",lightColor *QVector3D(0.2f,0.2f,0.2f));
+                   shader.setUniformValue("spotlight.diffuse",lightColor *QVector3D(0.5f,0.5f,0.5f));
+                   shader.setUniformValue("spotlight.specular",1.0f, 1.0f, 1.0f);
+
+                   shader.setUniformValue("spotlight.constant",1.0f);
+                   shader.setUniformValue("spotlight.linear",0.09f);
+                   shader.setUniformValue("spotlight.quadratic",0.032f);
+
+                    //方向光
+                   shader.setUniformValue("directlight.direction",-0.2f, -1.0f, -0.3f);
+                   shader.setUniformValue("directlight.ambient",DirLight_ambient);
+                   shader.setUniformValue("directlight.diffuse",DirLight_diffuse);
+                   shader.setUniformValue("directlight.specular", DirLight_dspecular);
+
+                                       QString iStr="pointlight["+QString::number(0)+"]."+"position";
+                                      shader.setUniformValue(iStr.toStdString().c_str(),lightPos);
+
+                                       iStr="pointlight["+QString::number(0)+"]."+"ambient";
+                                      shader.setUniformValue(iStr.toStdString().c_str(),pointLightColor[0] *QVector3D(0.2f,0.2f,0.2f));
+                                       iStr="pointlight["+QString::number(0)+"]."+"diffuse";
+                                      shader.setUniformValue(iStr.toStdString().c_str(),pointLightColor[0] *QVector3D(0.5f,0.5f,0.5f));
+                                       iStr="pointlight["+QString::number(0)+"]."+"specular";
+                                      shader.setUniformValue(iStr.toStdString().c_str(),pointLightColor[0]);
+
+                                       iStr="pointlight["+QString::number(0)+"]."+"constant";
+                                      shader.setUniformValue(iStr.toStdString().c_str(),1.0f);
+                                        iStr="pointlight["+QString::number(0)+"]."+"linear";
+                                      shader.setUniformValue(iStr.toStdString().c_str(),0.09f);
+                                        iStr="pointlight["+QString::number(0)+"]."+"quadratic";
+                                      shader.setUniformValue(iStr.toStdString().c_str(),0.032f);
+                                      shader.setUniformValue("material.shininess", 32.0f);
+}
+
 void MyOpenglWidget::genSkyBoxVAOandVBO()
 {
     genShader(skyshaderProgram,":/shader/skybox.vert",":/shader/skybox.frag");
@@ -751,4 +810,29 @@ void MyOpenglWidget::genSkyBoxVAOandVBO()
     glBufferData(GL_ARRAY_BUFFER, sizeof(Data::skyboxVertices), &Data::skyboxVertices, GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+}
+
+void MyOpenglWidget::MultiFrameBuffer()
+{
+
+    
+//创建一个自定义的MultiSample帧缓冲
+    glGenFramebuffers(1, &fboMultiSample);
+    glBindFramebuffer(GL_FRAMEBUFFER, fboMultiSample);
+    glGenTextures(1, &multiSampleTex);
+    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, multiSampleTex);
+    glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 4, GL_RGB, width(), height(), GL_TRUE);
+    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, multiSampleTex, 0);
+    glGenRenderbuffers(1, &rboMultiSample);
+    glBindRenderbuffer(GL_RENDERBUFFER, rboMultiSample);
+    glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_DEPTH24_STENCIL8, width(), height());
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rboMultiSample);
+
+    //善后工作
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+        qDebug() << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << endl;
+    glBindFramebuffer(GL_FRAMEBUFFER, defaultFramebufferObject() );
+
+
 }

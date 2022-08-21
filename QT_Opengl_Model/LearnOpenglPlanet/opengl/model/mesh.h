@@ -43,19 +43,22 @@ public:
 
     QOpenGLShaderProgram m_shader;
 
+    FGLData m_gldata;
     //EMeshType m_meshtype;
 
 public:
     ~Mesh();
 
     void Draw(QOpenGLShaderProgram &shader);
+
+    void DrawInstance(QOpenGLShaderProgram &shader,unsigned int amount);
     //Mesh(QOpenGLFunctions_3_3_Core *glFun,vector<Vertex>vertices,vector<unsigned int>indices,vector<Texture>textures,EMeshType meshtype);
     Mesh(QOpenGLFunctions_3_3_Core *glFun, vector<Vertex> vertices,
          vector<unsigned int> indices, vector<Texture> textures);
     Mesh(const Mesh & mesh);
 
 private:
-    FGLData m_gldata;
+
 
     QOpenGLFunctions_3_3_Core * m_glFuns;
 

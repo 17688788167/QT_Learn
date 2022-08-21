@@ -1,4 +1,4 @@
-#ifndef CAMERA_H
+﻿#ifndef CAMERA_H
 #define CAMERA_H
 
 #include "scene.h"
@@ -19,7 +19,7 @@ enum Camera_Movement {
 // 默认值
 const float YAW         = -90.0f;
 const float PITCH       =  0.0f;
-const float SPEED       =  5.0f;
+const float SPEED       =  25.0f;
 const float SENSITIVITY =  0.1f;
 const float ZOOM        =  45.0f;
 

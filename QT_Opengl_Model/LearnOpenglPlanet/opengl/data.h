@@ -182,6 +182,12 @@ public:
          0.05f,  0.05f,  0.0f, 1.0f, 1.0f
     };
 
+
+  constexpr static float planeVertices[] = {
+      -0.5f, -0.5f, 0.5f,  0.0f,  0.0f,
+      0.5f, -0.5f, 0.5f,  0.0f,  0.0f,
+      0.0f, 0.5f, 0.5f,  0.0f,  0.0f
+  };
 };
 
 
