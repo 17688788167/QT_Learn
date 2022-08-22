@@ -19,9 +19,23 @@ public:
     ~frameBuffer();
     void initScreen();
     void initFbo();
+    void initSingleFbo();
+    void initMultiFbo();
+
 
     void paintScreen();
+    void paintSingleScreen();
+    void paintMultiScreen();
+
+
     void paintFbo();
+
+    void paintSingleFbo();
+    void paintMultiFbo();
+
+
+
+
 
     void freeScreen();
     void freeFbo();
@@ -53,6 +67,9 @@ public:
      unsigned int rbo;
 
 
+     unsigned int fboMultiSample;
+     unsigned int rboMultiSample;
+     unsigned int multiSampleTex;
 
 
 public:

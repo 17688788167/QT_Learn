@@ -87,6 +87,7 @@ vec3 norm=normalize(fs_in.Normal);
 vec3 viewDir=normalize(viewPos-fs_in.FragPos);
 
 
+
 void main()
 {
 //冯氏光照模型 环境光照ambient,漫反射光照Diffuse,镜面光照Specular
@@ -124,9 +125,11 @@ vec3 CalcSpotLightColor(SpotLight light)
     vec3 diffuse=light.diffuse*diff*diffuseTexColor;
     diffuse*=attenuation;
 
+    //Blinn-Phong
+    vec3 halfwayDir=normalize(lightDir+viewDir);
     //镜面光照
-    vec3 reflectDir=reflect(-lightDir,norm);
-    float spec=pow(max(dot(viewDir,reflectDir),0),material.shininess);
+    //vec3 reflectDir=reflect(-lightDir,norm);
+    float spec=pow(max(dot(norm,halfwayDir),0),material.shininess);
     vec3 specular=light.specular*spec*specularTexColor;
     specular*=attenuation;
 
@@ -150,9 +153,10 @@ vec3 CalcDirectLightColor(DirectLight light)
      float diff = max(dot(norm,lightDir),0.0);
      vec3 diffuse=light.diffuse*diff*diffuseTexColor;
 
+        vec3 halfwayDir=normalize(lightDir+viewDir);
      //镜面光照
-     vec3 reflectDir=reflect(-lightDir,norm);
-     float spec=pow(max(dot(viewDir,reflectDir),0),material.shininess);
+     //vec3 reflectDir=reflect(-lightDir,norm);
+     float spec=pow(max(dot(norm,halfwayDir),0),material.shininess);
      vec3 specular=light.specular*spec*specularTexColor;
 
       return ambient+diffuse+specular;
@@ -175,8 +179,9 @@ vec3 CalcPointLightColor(PointLight light)
     diffuse*=attenuation;
 
     //镜面光照
+    vec3 halfwayDir=normalize(lightDir+viewDir);
     vec3 reflectDir=reflect(-lightDir,norm);
-    float spec=pow(max(dot(viewDir,reflectDir),0),material.shininess);
+    float spec=pow(max(dot(norm,halfwayDir),0),material.shininess);
     vec3 specular=light.specular*spec*specularTexColor;
     specular*=attenuation;
     //return vec3(0,0,0);
