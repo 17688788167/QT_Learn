@@ -41,7 +41,9 @@ SOURCES += \
     opengl/model/skybox.cpp \
     opengl/model/geometry.cpp \
     opengl/model/planet.cpp \
-    opengl/model/framebuffer.cpp
+    opengl/model/framebuffer.cpp \
+    opengl/model/cube.cpp \
+    opengl/model/plane.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -61,7 +63,9 @@ HEADERS += \
     opengl/iglbase.h \
     opengl/model/geometry.h \
     opengl/model/planet.h \
-    opengl/model/framebuffer.h
+    opengl/model/framebuffer.h \
+    opengl/model/cube.h \
+    opengl/model/plane.h
 
 FORMS += \
         mainwindow.ui \

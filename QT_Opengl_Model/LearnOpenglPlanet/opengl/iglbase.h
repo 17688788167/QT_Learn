@@ -2,6 +2,7 @@
 #define IGLBASE_H
 #include <QOpenGLShaderProgram>
 #include <QOpenGLFunctions_3_3_Core>
+#include <QOpenGLTexture>
 #include "data.h"
 
 class IGLBase
@@ -11,6 +12,10 @@ public:
     FGLData m_gldata;
     QOpenGLFunctions_3_3_Core * m_glFuns;
     QOpenGLShaderProgram * m_glShader;
+    QOpenGLTexture* m_diffuse;
+    QOpenGLTexture* m_specular;
+
+
     IGLBase(QOpenGLFunctions_3_3_Core* glfun)
     {
         this->m_glFuns=glfun;
