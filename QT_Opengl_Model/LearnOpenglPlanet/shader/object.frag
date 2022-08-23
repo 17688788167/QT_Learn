@@ -87,7 +87,7 @@ vec3 norm=normalize(fs_in.Normal);
 vec3 viewDir=normalize(viewPos-fs_in.FragPos);
 
 
-
+uniform sampler2D textureTest;
 void main()
 {
 //冯氏光照模型 环境光照ambient,漫反射光照Diffuse,镜面光照Specular
@@ -104,6 +104,8 @@ void main()
        // vec3 reflectionSkyBox=texture(skybox,R).rgb;
        // vec3 reflection=reflectionSkyBox*reflectionTexColor;
     //result+=reflection;
+
+        //result=texture(textureTest,fs_in.TexCoords).rgb;
     FragColor = vec4(result, 1.0);
 
     //gl_FragDepth = gl_FragCoord.z + 0.1;

@@ -23,6 +23,7 @@
 #include <QOpenGLBuffer>
 #include <QOpenGLFramebufferObjectFormat>
 #include "framebuffer.h"
+#include "cube.h"
 
 class Light;
 class MyOpenglWidget : public QOpenGLWidget,QOpenGLFunctions_3_3_Core
@@ -123,7 +124,9 @@ private:
     Model *planet=NULL;
      Model *rock=NULL;
     Planet* rocks=NULL;
-frameBuffer* frame;
+
+    CubeActor* cube=NULL;
+    frameBuffer* frame;
     Mesh* cubeMesh;
     LightBase* m_light;
 
@@ -134,6 +137,7 @@ frameBuffer* frame;
 public:
     Mesh* processMesh();
     Mesh* processMesh(const float *vertices,int size,unsigned int textureId);
+    Mesh* processMesh(const float *vertices,int size,unsigned int diffusetextureId,unsigned int speculartextureId);
     QVector3D cameraPosInitByModel(Model *model);
 
     static void genShader(QOpenGLShaderProgram& shader,const QString &vertFile,const QString &fragFile);

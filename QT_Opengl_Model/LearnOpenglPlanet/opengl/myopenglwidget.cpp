@@ -25,50 +25,7 @@ QVector3D( 1.5f, 0.2f, -1.5f),
 QVector3D(-1.3f, 1.0f, -1.5f)
 };
 
-float vertices[] = {
-    // positions          // normals           // texture coords
-    -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
-     0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 0.0f,
-     0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
-     0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
-    -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 1.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
 
-    -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
-     0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 0.0f,
-     0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
-     0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
-    -0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 1.0f,
-    -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
-
-    -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-    -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
-    -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-    -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-    -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
-    -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-
-     0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-     0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
-     0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-     0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-     0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
-     0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-
-    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
-     0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 1.0f,
-     0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
-     0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
-    -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
-
-    -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f,
-     0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 1.0f,
-     0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
-     0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
-    -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f,
-    -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f
-};
 
 QVector3D pointLightPositions[] = {
     QVector3D( 0.7f, 0.2f, 2.0f),
@@ -271,7 +228,7 @@ void MyOpenglWidget::initializeGL()
     m_diffuseTex=new QOpenGLTexture(QImage(":/iamge/container2.png").mirrored());
     m_specularTex=new QOpenGLTexture(QImage(":/iamge/container2_specular.png").mirrored());
 
-
+textureWall=new QOpenGLTexture(QImage(":/iamge/wall.jpg").mirrored());
 
 
     m_glfuns=QOpenGLContext::currentContext()->versionFunctions<QOpenGLFunctions_3_3_Core>();
@@ -279,7 +236,8 @@ void MyOpenglWidget::initializeGL()
     //m_lightMesh=processMesh(EMeshType::Light);
      m_light=new LightBase(m_glfuns,lightColor);
         reflectCube=new LightBase(m_glfuns,lightColor);
-    cubeMesh=processMesh(&Data::verticesAndTexCoords[0],36,m_diffuseTex->textureId());
+    cubeMesh=processMesh(&Data::cubeVertices[0],36,m_diffuseTex->textureId());
+
     genSkyBoxVAOandVBO();
 
     geometry=new Geometry(m_glfuns);
@@ -317,9 +275,11 @@ void MyOpenglWidget::initializeGL()
     //rock=new Model(m_glfuns,"D:/qt/QT_Opengl/QT_Opengl_Model/LearnOpenglPlanet/model/rock/rock.obj");
     rocks=new Planet(m_glfuns);
 
-    plane=processMesh(Data::planeVertices,3,m_diffuseTex->textureId());
+    plane=processMesh(Data::planeVertices,6,textureWall->textureId());
 
     frame=new frameBuffer(m_glfuns,this);
+
+    cube=new CubeActor(m_glfuns);
 }
 
 
@@ -336,7 +296,7 @@ void MyOpenglWidget::paintGL()
     deltaTime=CurrentTime-lastTime;
     lastTime=CurrentTime;
 
-    qDebug()<<1/deltaTime;
+   // qDebug()<<1/deltaTime;
 
     QMatrix4x4 model;
     QMatrix4x4 view;
@@ -402,7 +362,7 @@ frame->paintFbo();
             m_ShaderProgram.bind();
             model.translate(10,10,0);
             m_ShaderProgram.setUniformValue("model", model);
-            //if(rock)
+            //if(rock)s
              //rock->Draw(m_ShaderProgram);
 
             rocks->Draw(m_ShaderProgram,rockShaderProgram);
@@ -410,13 +370,15 @@ frame->paintFbo();
           if(cubeMesh)
           {
               model.setToIdentity();
-              reflectionShaderProgram.bind();
-              reflectionShaderProgram.setUniformValue("model", model);
-              reflectionShaderProgram.setUniformValue("viewPos",m_camera.Position);
-              reflectCube->Draw(reflectionShaderProgram);
+              m_ShaderProgram.bind();
+              m_ShaderProgram.setUniformValue("model", model);
+              m_ShaderProgram.setUniformValue("viewPos",m_camera.Position);
+              cubeMesh->Draw(m_ShaderProgram);
           }
 
 
+
+          cube->Draw(m_ShaderProgram);
           if(m_model)
           {
                 m_ShaderProgram.bind();
@@ -600,7 +562,7 @@ Mesh * MyOpenglWidget::processMesh()
     vector<unsigned int> _indices;
     vector<Texture> _textures;
     //因为数组vertices和结构体_vertices表示的数据都是一致的，切内存都是连续的，所以可以直接将数据的数据复制给结构体
-    memcpy(&_vertices[0],vertices,sizeof(vertices));
+    memcpy(&_vertices[0],Data::cubeVertices,sizeof(Data::cubeVertices));
 
     for(int i=0;i<36;i++)
     {
@@ -627,12 +589,15 @@ Mesh *MyOpenglWidget::processMesh(const float *vertices, int size, unsigned int 
     for(int i=0;i<size;i++)
     {
         Vertex vert;
-        vert.Position[0]=vertices[i*5+0];
-        vert.Position[1]=vertices[i*5+1];
-        vert.Position[2]=vertices[i*5+2];
+        vert.Position[0]=vertices[i*8+0];
+        vert.Position[1]=vertices[i*8+1];
+        vert.Position[2]=vertices[i*8+2];
 
-        vert.TexCoords[0]=vertices[i*5+3];
-        vert.TexCoords[1]=vertices[i*5+4];
+        vert.Normal[0]=vertices[i*8+3];
+        vert.Normal[1]=vertices[i*8+4];
+        vert.Normal[2]=vertices[i*8+5];
+        vert.TexCoords[0]=vertices[i*8+6];
+        vert.TexCoords[1]=vertices[i*8+7];
 
         _vertices.push_back(vert);
         _indices.push_back(i);
@@ -643,6 +608,40 @@ Mesh *MyOpenglWidget::processMesh(const float *vertices, int size, unsigned int 
     tex.type="texture_diffuse";
     _textures.push_back(tex);
 
+    return new Mesh(m_glfuns,_vertices,_indices,_textures);
+}
+
+Mesh *MyOpenglWidget::processMesh(const float *vertices, int size, unsigned int diffusetextureId, unsigned int speculartextureId)
+{
+    vector<Vertex> _vertices;
+    vector<unsigned int> _indices;
+    vector<Texture> _textures;
+
+    for(int i=0;i<size;i++)
+    {
+        Vertex vert;
+        vert.Position[0]=vertices[i*8+0];
+        vert.Position[1]=vertices[i*8+1];
+        vert.Position[2]=vertices[i*8+2];
+
+        vert.Normal[0]=vertices[i*8+3];
+        vert.Normal[1]=vertices[i*8+4];
+        vert.Normal[2]=vertices[i*8+5];
+        vert.TexCoords[0]=vertices[i*8+6];
+        vert.TexCoords[1]=vertices[i*8+7];
+
+        _vertices.push_back(vert);
+        _indices.push_back(i);
+    }
+
+    Texture tex;
+    tex.id=diffusetextureId;
+    tex.type="texture_diffuse";
+    _textures.push_back(tex);
+
+    tex.id=speculartextureId;
+    tex.type="texture_specular";
+    _textures.push_back(tex);
     return new Mesh(m_glfuns,_vertices,_indices,_textures);
 }
 
