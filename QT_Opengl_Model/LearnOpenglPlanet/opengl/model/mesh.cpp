@@ -15,6 +15,7 @@ void Mesh::Draw(QOpenGLShaderProgram &shader)
 
     for(unsigned int i=0;i<m_textures.size();++i)
     {
+        shader.bind();
         m_glFuns->glActiveTexture(GL_TEXTURE0+i);
         string number;
         string name=m_textures[i].type;

@@ -16,7 +16,7 @@ void Planet::setupMesh()
     QVector4D* qvector4d=new QVector4D[4*amount];
     std::srand(time(NULL));
     float radius=150.0f;
-    float offset=25.0f;
+    float offset=125.0f;
     for(unsigned int i=0;i<amount;i++)
     {
         QMatrix4x4 model;
@@ -115,7 +115,7 @@ void Planet::Draw(QOpenGLShaderProgram &planetShader, QOpenGLShaderProgram &rock
         QMatrix4x4 model;
         model.setToIdentity();
         model.translate(0,-10,0);
-        model.scale(10);
+        model.scale(3);
         planetShader.setUniformValue("model",model);
         planet->Draw(planetShader);
     }

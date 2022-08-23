@@ -78,7 +78,12 @@ uniform vec3 objectColor;
 uniform vec3 viewPos;
 //uniform samplerCube skybox;
 
+
+
+
 vec3 diffuseTexColor=vec3(texture(material.texture_diffuse1,fs_in.TexCoords));
+
+
 vec3 specularTexColor=vec3(texture(material.texture_specular1,fs_in.TexCoords));
 vec3 reflectionTexColor=vec3(texture(material.texture_reflection1,fs_in.TexCoords));
 //vec3 emissionTexColor=vec3(texture(material.emission,fs_in.TexCoords));
@@ -86,10 +91,12 @@ vec3 reflectionTexColor=vec3(texture(material.texture_reflection1,fs_in.TexCoord
 vec3 norm=normalize(fs_in.Normal);
 vec3 viewDir=normalize(viewPos-fs_in.FragPos);
 
-
+float gamma=1/2.2;
 
 void main()
 {
+
+      diffuseTexColor=pow(diffuseTexColor,vec3(gamma));
 //冯氏光照模型 环境光照ambient,漫反射光照Diffuse,镜面光照Specular
     vec3 result=vec3(0,0,0);
     result += CalcSpotLightColor(spotlight);
@@ -104,6 +111,11 @@ void main()
        // vec3 reflectionSkyBox=texture(skybox,R).rgb;
        // vec3 reflection=reflectionSkyBox*reflectionTexColor;
     //result+=reflection;
+
+
+
+
+
     FragColor = vec4(result, 1.0);
 
     //gl_FragDepth = gl_FragCoord.z + 0.1;
@@ -111,10 +123,11 @@ void main()
 
 vec3 CalcSpotLightColor(SpotLight light)
 {
+
     //点光源会根据距离进行衰减，衰减的值用一个二次方程表示，并让环境光，漫反射光，镜面反射光都*=衰减因子
     float distance=length(light.position-fs_in.FragPos);
-    float attenuation=1.0/(light.constant+light.linear*distance+light.quadratic*distance*distance);
-
+    //float attenuation=1.0/(light.constant+light.linear*distance+light.quadratic*distance*distance);
+    float attenuation=1.0/(distance*distance);
     //环境光照ambient
     vec3 ambient=light.ambient*diffuseTexColor;
     ambient*=attenuation;
@@ -122,6 +135,7 @@ vec3 CalcSpotLightColor(SpotLight light)
     //漫反射光照
     vec3 lightDir=normalize(light.position-fs_in.FragPos);
     float diff = max(dot(norm,lightDir),0.0);
+
     vec3 diffuse=light.diffuse*diff*diffuseTexColor;
     diffuse*=attenuation;
 
@@ -146,6 +160,7 @@ vec3 CalcSpotLightColor(SpotLight light)
 vec3 CalcDirectLightColor(DirectLight light)
 {
     //环境光照ambient
+
     vec3 ambient=light.ambient*diffuseTexColor;
 
     //漫反射光照
@@ -164,10 +179,11 @@ vec3 CalcDirectLightColor(DirectLight light)
 
 vec3 CalcPointLightColor(PointLight light)
 {
+
     //点光源会根据距离进行衰减，衰减的值用一个二次方程表示，并让环境光，漫反射光，镜面反射光都*=衰减因子
     float distance=length(light.position-fs_in.FragPos);
-    float attenuation=1.0/(light.constant+light.linear*distance+light.quadratic*distance*distance);
-
+    //float attenuation=1.0/(light.constant+light.linear*distance+light.quadratic*distance*distance);
+ float attenuation=1.0/(distance*distance);
     //环境光照ambient
     vec3 ambient=light.ambient*diffuseTexColor;
     ambient*=attenuation;

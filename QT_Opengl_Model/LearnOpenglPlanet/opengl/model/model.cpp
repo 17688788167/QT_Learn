@@ -1,6 +1,6 @@
 #include "model.h"
 #include <iostream>
-
+#include <QImage>
 Model::Model(QOpenGLFunctions_3_3_Core *glFun,const char *path)
 {
     this->m_glFuns=glFun;
@@ -183,12 +183,19 @@ vector<Texture> Model::loadMaterialTexture(aiMaterial *mat, aiTextureType type, 
     return textures;
 }
 
+
 unsigned int Model::TextureFromFile(const char *path, const string &directory)
 {
     string filename=string(path);
     filename=directory+'/'+filename;
 
-    QOpenGLTexture* texture=new QOpenGLTexture(QImage(filename.c_str()).mirrored());
+    QImage image=QImage(filename.c_str()).convertToFormat(QImage::Format_RGB888);
+    QOpenGLTexture* texture=new QOpenGLTexture(QOpenGLTexture::Target2D);
+     m_glFuns-> glBindTexture(GL_TEXTURE_2D,texture->textureId());
+      m_glFuns->glTexImage2D(GL_TEXTURE_2D,0,GL_SRGB,image.width(),image.height(),0,GL_RGB,GL_UNSIGNED_BYTE,image.bits());
+    m_glFuns->glGenerateMipmap(GL_TEXTURE_2D);
+    //std::shared_ptr<QImage>image=std::make_shared(new QImage(filename.c_str()).mirrored());
+   // QOpenGLTexture* texture=new QOpenGLTexture(QImage(filename.c_str()).mirrored());
     if(texture==NULL)
         cout<<"texture is null";
     else
