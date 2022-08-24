@@ -24,6 +24,7 @@
 #include <QOpenGLFramebufferObjectFormat>
 #include "framebuffer.h"
 #include "cube.h"
+#include "mydepthtexture.h"
 
 class Light;
 class MyOpenglWidget : public QOpenGLWidget,QOpenGLFunctions_3_3_Core
@@ -125,6 +126,9 @@ private:
      Model *rock=NULL;
     Planet* rocks=NULL;
 
+    MyDepthTexture* depthTexture=NULL;
+
+public:
     CubeActor* cube=NULL;
     frameBuffer* frame;
     Mesh* cubeMesh;

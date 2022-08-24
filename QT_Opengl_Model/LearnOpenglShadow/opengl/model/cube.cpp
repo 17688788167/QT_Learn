@@ -28,7 +28,15 @@ m_specular->bind(1);
      model.scale(3);
      shader.setUniformValue("model",model);
      m_glFuns->glBindVertexArray(m_gldata.VAO);
+     m_glFuns->glDrawArrays(GL_TRIANGLES, 0, 36);
+
+    model.setToIdentity();
+    model.translate(0,0.5f,0);
+    model.scale(2);
+    shader.setUniformValue("model",model);
+    m_glFuns->glBindVertexArray(m_gldata.VAO);
     m_glFuns->glDrawArrays(GL_TRIANGLES, 0, 36);
+
 
     model.setToIdentity();
     shader.setUniformValue("model",model);

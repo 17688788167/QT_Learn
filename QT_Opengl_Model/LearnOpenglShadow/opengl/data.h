@@ -183,6 +183,17 @@ public:
     };
 
 
+  //顶点数据
+  constexpr static float quad1Vertices[] = {
+      // positions   // texCoords
+      -1.0f,  1.0f,  0.0f, 1.0f,
+      -1.0f, -1.0f,  0.0f, 0.0f,
+      1.0f, -1.0f,  1.0f, 0.0f,
+
+      -1.0f,  1.0f,  0.0f, 1.0f,
+      1.0f, -1.0f,  1.0f, 0.0f,
+      1.0f,  1.0f,  1.0f, 1.0f
+  };
 
 
  constexpr static float planeVertices[] = {

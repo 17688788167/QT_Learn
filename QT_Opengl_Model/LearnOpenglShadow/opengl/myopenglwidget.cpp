@@ -5,7 +5,7 @@
 #include <QtMath>
 #define QMatrix4x4DataSize 64
 
-QVector3D lightPos(1.2f, 1.0f, 2.0f);
+QVector3D lightPos(6.0f, 5.0f, 5.0f);
 QVector3D objectPos(-1.7f, 3.0f, -7.5f);
 QVector3D objectScale(5.0f, 5.0f, 5.0f);
 QVector3D lightColor(1.0f, 1.0f, 1.0f);
@@ -280,6 +280,8 @@ textureWall=new QOpenGLTexture(QImage(":/iamge/wall.jpg").mirrored());
 
 
     cube=new CubeActor(m_glfuns);
+
+    depthTexture=new MyDepthTexture(m_glfuns,this);
 }
 
 
@@ -301,6 +303,17 @@ void MyOpenglWidget::paintGL()
     QMatrix4x4 model;
     QMatrix4x4 view;
     QMatrix4x4 projection;
+
+
+    QMatrix4x4 lightProjection, lightView;
+    QMatrix4x4 lightSpaceMatrix;
+
+    float near_plane=1.0f;
+    float far_plane=7.5f;
+    lightProjection.ortho(-10.0f,10.0f,-10.0f,10.0f,near_plane,far_plane);
+    lightView.lookAt(QVector3D(-2.0f,4.0f,-1.0f),QVector3D(0.0f,0.0f,0.0f),QVector3D(0.0f,1.0f,0.0f));
+    lightSpaceMatrix=lightProjection*lightView;
+
 
 
     for(int i=0;i<8;++i)
@@ -336,79 +349,37 @@ void MyOpenglWidget::paintGL()
 
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-    // first pass
-    glBindFramebuffer(GL_FRAMEBUFFER, fboMultiSample);
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LESS);
-
-    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-
 
     switch (m_shape) {
     case Rect:
     glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
 
+   depthTexture->paintFbo(lightSpaceMatrix);
 
-            setObjectShader();
-            setShaderLight(rockShaderProgram);
-            model.setToIdentity();
-            m_ShaderProgram.setUniformValue("model", model);
+   setObjectShader();
 
-            m_ShaderProgram.bind();
+
+
+
+
+
             plane->Draw(m_ShaderProgram);
-            //if(planet)
-           // planet->Draw(m_ShaderProgram);
-            m_ShaderProgram.bind();
-            model.translate(10,10,0);
-            m_ShaderProgram.setUniformValue("model", model);
-            //if(rock)s
-             //rock->Draw(m_ShaderProgram);
+            cube->Draw(m_ShaderProgram);
 
-            rocks->Draw(m_ShaderProgram,rockShaderProgram);
-
-          if(cubeMesh)
-          {
-              model.setToIdentity();
-              m_ShaderProgram.bind();
-              m_ShaderProgram.setUniformValue("model", model);
-              m_ShaderProgram.setUniformValue("viewPos",m_camera.Position);
-              cubeMesh->Draw(m_ShaderProgram);
-          }
-
-
-
-          cube->Draw(m_ShaderProgram);
-          if(m_model)
-          {
-                m_ShaderProgram.bind();
-                m_ShaderProgram.setUniformValue("model", model);
-                m_model->Draw(m_ShaderProgram);
-          }
-
-
-          //glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
 
            m_LightShaderProgram.bind();
-           m_LightShaderProgram.setUniformValue("model", model);
 
 
-           if(m_model)
-           {
-               m_model->DrawBox(m_LightShaderProgram);
-           }
 
           model.setToIdentity();
           model.translate(lightPos);
           model.rotate(45.0f, 1.0f, 1.0f, 0.5f);
           model.scale(0.5f);
           m_LightShaderProgram.setUniformValue("model", model);
-          //m_LightShaderProgram.setUniformValue("lightColor",pointLightColor[0]);
-          //m_lightMesh->Draw(m_LightShaderProgram);
           m_light->Draw(m_LightShaderProgram);
 
 
-
+depthTexture->paintScreen();
         break;
     }
 }
@@ -755,7 +726,7 @@ void MyOpenglWidget::setShaderLight(QOpenGLShaderProgram &shader)
                    shader.setUniformValue("directlight.specular", DirLight_dspecular);
 
                                        QString iStr="pointlight["+QString::number(0)+"]."+"position";
-                                      shader.setUniformValue(iStr.toStdString().c_str(),lightPos);
+                                      shader.setUniformValue(iStr.toStdString().c_str(), lightPos);
 
                                        iStr="pointlight["+QString::number(0)+"]."+"ambient";
                                       shader.setUniformValue(iStr.toStdString().c_str(),pointLightColor[0] *QVector3D(0.2f,0.2f,0.2f));

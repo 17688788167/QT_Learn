@@ -27,7 +27,7 @@ void MyDepthTexture::initScreen()
     m_glfuns->glBindVertexArray(VAO);
     m_glfuns->glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-    m_glfuns->glBufferData(GL_ARRAY_BUFFER,sizeof(Data::quadVertices),&Data::quadVertices[0], GL_STATIC_DRAW);
+    m_glfuns->glBufferData(GL_ARRAY_BUFFER,sizeof(Data::quad1Vertices),&Data::quad1Vertices[0], GL_STATIC_DRAW);
 
 
 
@@ -50,6 +50,7 @@ void MyDepthTexture::initScreen()
        screenTexture=new QOpenGLTexture(QImage(":/iamge/container2.png").mirrored());
 }
 
+unsigned int depthMap;
 void MyDepthTexture::initFbo()
 {
 
@@ -57,7 +58,7 @@ void MyDepthTexture::initFbo()
 
     m_glfuns->glGenFramebuffers(1, &depthMapFBO);
     // create depth texture
-    unsigned int depthMap;
+
     m_glfuns->glGenTextures(1, &depthMap);
     m_glfuns->glBindTexture(GL_TEXTURE_2D, depthMap);
     m_glfuns->glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
@@ -81,10 +82,10 @@ void MyDepthTexture::paintFbo(const QMatrix4x4& lightSpaceMatrix)
    m_glfuns-> glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
    m_glfuns->glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
    m_glfuns-> glClear(GL_DEPTH_BUFFER_BIT);
+   m_DepthMapShaderProgram.bind();
    m_DepthMapShaderProgram.setUniformValue("lightSpaceMatrix", lightSpaceMatrix);
 
-
-
+   m_glwidget->cube->Draw(m_DepthMapShaderProgram);
 
    m_glfuns-> glBindFramebuffer(GL_FRAMEBUFFER, m_glwidget-> defaultFramebufferObject());
    m_DepthMapShaderProgram.release();
@@ -92,20 +93,27 @@ void MyDepthTexture::paintFbo(const QMatrix4x4& lightSpaceMatrix)
 
 void MyDepthTexture::paintScreen()
 {
+
+    m_glfuns-> glViewport(0, 0, m_glwidget-> width(),  m_glwidget->height());
+
+    //m_glfuns->  glDisable(GL_DEPTH_TEST); // disable depth test so screen-space quad isn't discarded due to depth test.
+     // clear all relevant buffers
+    //m_glfuns->  glClearColor(1.0f, 1.0f, 1.0f, 1.0f); // set clear color to white (not really necessary actually, since we won't be able to see behind the quad anyways)
+    //m_glfuns->  glClear(GL_COLOR_BUFFER_BIT);
+
     screenShaderProgram.bind();
-   m_glfuns-> glViewport(0, 0, m_glwidget-> width(),  m_glwidget->height());
 
+     //screenTexture->bind(0);
+     //screenShaderProgram.setUniformValue();
 
+    m_glfuns-> glActiveTexture(GL_TEXTURE0);
+     screenShaderProgram.setUniformValue("screenTexture", 0);
+    m_glfuns-> glBindTexture(GL_TEXTURE_2D, depthMap);	// use the color attachment texture as the texture of the quad plane
 
 
      m_glfuns->glBindVertexArray(VAO);
-        //screenTexture->bind(0);
-     m_glfuns-> glActiveTexture(GL_TEXTURE0);
-     m_glfuns-> glBindTexture(GL_TEXTURE_2D, depthMapFBO);	// use the color attachment texture as the texture of the quad plane
-
-
      m_glfuns-> glDrawArrays(GL_TRIANGLES, 0, 6);
 
-screenShaderProgram.release();
+    screenShaderProgram.release();
 
 }
