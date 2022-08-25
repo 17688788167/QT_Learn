@@ -24,16 +24,26 @@ m_specular->bind(1);
 
 
      model.setToIdentity();
-     model.translate(3,1.0f,3);
-     model.scale(3);
+     model.translate(-3,1.0f,0);
+     model.scale(1.5f);
      shader.setUniformValue("model",model);
      m_glFuns->glBindVertexArray(m_gldata.VAO);
      m_glFuns->glDrawArrays(GL_TRIANGLES, 0, 36);
 
     model.setToIdentity();
     model.translate(0,0.5f,0);
-    model.scale(2);
+
     shader.setUniformValue("model",model);
+    m_glFuns->glBindVertexArray(m_gldata.VAO);
+    m_glFuns->glDrawArrays(GL_TRIANGLES, 0, 36);
+
+    model.setToIdentity();
+
+    model.scale(20);
+    shader.setUniformValue("model",model);
+
+textureWall->bind(0);
+textureWall->bind(1);
     m_glFuns->glBindVertexArray(m_gldata.VAO);
     m_glFuns->glDrawArrays(GL_TRIANGLES, 0, 36);
 
@@ -72,6 +82,7 @@ void CubeActor::setupMesh()
     //new QOpenGLTexture(QImage(":/iamge/container2.png").mirrored());
     m_diffuse=new QOpenGLTexture(QImage(":/iamge/container2.png").mirrored());
     m_specular=new QOpenGLTexture(QImage(":/iamge/container2_specular.png").mirrored());
+    textureWall=new QOpenGLTexture(QImage(":/iamge/wall.jpg").mirrored());
 }
 
 void CubeActor::Draw()

@@ -78,6 +78,7 @@ MyOpenglWidget::MyOpenglWidget(QWidget *parent) : QOpenGLWidget(parent)
     QSurfaceFormat format;
     format.setSamples(4);
     setFormat(format);
+    lightPos=QVector3D(0.0f, 3.0f, 0.0f);
 }
 
 MyOpenglWidget::~MyOpenglWidget()
@@ -282,6 +283,7 @@ textureWall=new QOpenGLTexture(QImage(":/iamge/wall.jpg").mirrored());
     cube=new CubeActor(m_glfuns);
 
     depthTexture=new MyDepthTexture(m_glfuns,this);
+    pointDepthTexture=new PointDepthTexture(m_glfuns,this);
 }
 
 
@@ -308,7 +310,7 @@ void MyOpenglWidget::paintGL()
     QMatrix4x4 lightProjection, lightView;
     QMatrix4x4 lightSpaceMatrix;
 
-    float near_plane=1.0f;
+    float near_plane=0.10f;
     float far_plane=7.5f;
     lightProjection.ortho(-10.0f,10.0f,-10.0f,10.0f,near_plane,far_plane);
     lightView.lookAt(QVector3D(-2.0f,4.0f,-1.0f),QVector3D(0.0f,0.0f,0.0f),QVector3D(0.0f,1.0f,0.0f));
@@ -355,31 +357,40 @@ void MyOpenglWidget::paintGL()
     glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
 
    depthTexture->paintFbo(lightSpaceMatrix);
+  //renderScene(*depthTexture->m_DepthMapShaderProgram);
+   //depthTexture->paintScreen();
 
-   setObjectShader();
-
-
-
-
-
-
-            plane->Draw(m_ShaderProgram);
-            cube->Draw(m_ShaderProgram);
-
-
-           m_LightShaderProgram.bind();
+   pointDepthTexture->paintFbo();
 
 
 
-          model.setToIdentity();
-          model.translate(lightPos);
-          model.rotate(45.0f, 1.0f, 1.0f, 0.5f);
-          model.scale(0.5f);
-          m_LightShaderProgram.setUniformValue("model", model);
-          m_light->Draw(m_LightShaderProgram);
 
 
-depthTexture->paintScreen();
+   m_ShaderProgram.bind();
+   glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+   glEnable(GL_DEPTH_TEST);
+   glDepthFunc(GL_LESS);
+   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+   glViewport(0, 0, width(), height());
+   m_ShaderProgram.setUniformValue("far_plane", far_plane);
+
+
+            m_ShaderProgram.setUniformValue("lightSpaceMatrix", lightSpaceMatrix);
+            setObjectShader();
+            //textureWall ->bind(3);
+            glActiveTexture(GL_TEXTURE3);
+            glBindTexture(GL_TEXTURE_2D, depthTexture->depthMap);
+            m_ShaderProgram.setUniformValue("depthMap",3);
+
+            glActiveTexture(GL_TEXTURE4);
+            glBindTexture(GL_TEXTURE_2D, pointDepthTexture->depthCubemap);
+            m_ShaderProgram.setUniformValue("depthCubeMap",4);
+
+            renderScene(m_ShaderProgram);
+
+            m_ShaderProgram.release();
+
+
         break;
     }
 }
@@ -802,5 +813,17 @@ void MyOpenglWidget::MultiFrameBuffer()
         qDebug() << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << endl;
     glBindFramebuffer(GL_FRAMEBUFFER, defaultFramebufferObject() );
 
+
+}
+
+void MyOpenglWidget::renderScene(QOpenGLShaderProgram &shader)
+{
+    QMatrix4x4 model;
+    model.setToIdentity();
+    model.scale(10);
+    shader.setUniformValue("model", model);
+    plane->Draw(shader);
+
+    cube->Draw(shader);
 
 }

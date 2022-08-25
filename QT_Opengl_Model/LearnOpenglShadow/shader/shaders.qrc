@@ -28,5 +28,8 @@
         <file>screen.vert</file>
         <file>depthMap.frag</file>
         <file>depthMap.vert</file>
+        <file>pointdepthMap.frag</file>
+        <file>pointdepthMap.geom</file>
+        <file>pointdepthMap.vert</file>
     </qresource>
 </RCC>

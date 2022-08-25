@@ -14,7 +14,7 @@ public:
     virtual void setupMesh() override;
     virtual void Draw()override;
 
-
+QOpenGLTexture *textureWall;
 };
 
 #endif // CUBE_H

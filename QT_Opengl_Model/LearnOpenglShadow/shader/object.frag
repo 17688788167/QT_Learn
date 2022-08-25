@@ -7,6 +7,7 @@ in VS_OUT
     vec3 Normal;
     vec3 FragPos;
     vec2 TexCoords;
+    vec4 FragPosLightSpace;
 }fs_in;
 //受到不同的光照的影响程度
 struct Material
@@ -14,9 +15,14 @@ struct Material
     sampler2D texture_diffuse1;
     sampler2D texture_specular1;
     sampler2D texture_reflection1;
+
     float shininess;
 };
 uniform Material material;
+uniform sampler2D depthMap;
+
+float DirectShadowCalculation(vec4 fragPosLightSpace);
+float directShadow;
 
 //一个光源提供的不同的光照强度与光源的位置
 struct SpotLight
@@ -78,6 +84,9 @@ uniform vec3 objectColor;
 uniform vec3 viewPos;
 //uniform samplerCube skybox;
 
+uniform float far_plane;
+uniform samplerCube depthCubeMap;
+
 vec3 diffuseTexColor=vec3(texture(material.texture_diffuse1,fs_in.TexCoords));
 vec3 specularTexColor=vec3(texture(material.texture_specular1,fs_in.TexCoords));
 vec3 reflectionTexColor=vec3(texture(material.texture_reflection1,fs_in.TexCoords));
@@ -90,14 +99,15 @@ vec3 viewDir=normalize(viewPos-fs_in.FragPos);
 uniform sampler2D textureTest;
 void main()
 {
+   directShadow=DirectShadowCalculation(fs_in.FragPosLightSpace);
 //冯氏光照模型 环境光照ambient,漫反射光照Diffuse,镜面光照Specular
     vec3 result=vec3(0,0,0);
-    result += CalcSpotLightColor(spotlight);
+    //result += CalcSpotLightColor(spotlight);
     result += CalcDirectLightColor(directlight);
 
 //    for(int i=0; i<NR_POINT_LIGHTS;++i)
 //    {
-        result+=CalcPointLightColor(pointlight[0]);
+        //result+=CalcPointLightColor(pointlight[0]);
 //    }
        // vec3 I = normalize(fs_in.FragPos - viewPos);
        // vec3 R = reflect(I, normalize(fs_in.Normal));
@@ -141,7 +151,7 @@ vec3 CalcSpotLightColor(SpotLight light)
     diffuse*=alpha;
     specular*=alpha;
     //return vec3(1,1,1);
-    return ambient+diffuse+specular;
+    return ambient+(diffuse+specular);
     //return light.ambient+light.diffuse+light.specular;
 }
 
@@ -161,7 +171,7 @@ vec3 CalcDirectLightColor(DirectLight light)
      float spec=pow(max(dot(norm,halfwayDir),0),material.shininess);
      vec3 specular=light.specular*spec*specularTexColor;
 
-      return ambient+diffuse+specular;
+      return ambient+(1.0-directShadow)*(diffuse+specular);
 }
 
 vec3 CalcPointLightColor(PointLight light)
@@ -188,6 +198,41 @@ vec3 CalcPointLightColor(PointLight light)
     specular*=attenuation;
     //return vec3(0,0,0);
     //return vec3(0.1,0.1,0.1);
-    return ambient+diffuse+specular;
+
+    return ambient+(diffuse+specular);
 }
 
+float DirectShadowCalculation(vec4 fragPosLightSpace)
+{
+    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+    projCoords = projCoords * 0.5 + 0.5;
+    float closestDepth = texture(depthMap, projCoords.xy).r;
+    float currentDepth = projCoords.z;
+
+    float bias=0;
+          bias =max(0.05*(1.0-dot(norm,directlight.direction)),0.005);
+    float shadow =0;
+
+    vec2 texelSize=1.0/textureSize(depthMap,0);
+
+    for(int x=-1;x<=1;++x)
+    {
+        for(int y=-1;y<=1;++y)
+        {
+            float pcfDepth=texture(depthMap,projCoords.xy+vec2(x,y)*texelSize).r;
+
+            shadow+=currentDepth-bias>pcfDepth?1.0:0.0;
+        }
+
+    }
+        shadow/=9.0f;
+
+
+
+            //currentDepth-bias > closestDepth &&projCoords.z < 1.0 ? 1.0 : 0.0;
+
+    if(projCoords.z > 1.0/* || projCoords.x < 0.0 || projCoords.x > 1.0*/)
+            shadow = 0.0;
+
+ return shadow;
+}

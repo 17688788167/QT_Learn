@@ -1,5 +1,5 @@
-#ifndef MYDEPTHTEXTURE_H
-#define MYDEPTHTEXTURE_H
+#ifndef POINTDEPTHTEXTURE_H
+#define POINTDEPTHTEXTURE_H
 
 #include <QOpenGLShaderProgram>
 #include <QOpenGLFunctions_3_3_Core>
@@ -7,12 +7,13 @@
 
 class MyOpenglWidget;
 
-class MyDepthTexture
+
+class PointDepthTexture
 {
 public:
+    PointDepthTexture();
+    PointDepthTexture(QOpenGLFunctions_3_3_Core * glfuns,MyOpenglWidget* glwidget);
 
-    MyDepthTexture(QOpenGLFunctions_3_3_Core * glfuns,MyOpenglWidget* glwidget);
-    MyDepthTexture();
 
     QOpenGLFunctions_3_3_Core* m_glfuns;
     MyOpenglWidget* m_glwidget;
@@ -33,13 +34,13 @@ public:
     void initScreen();
     void initFbo();
 
-    void paintFbo(const QMatrix4x4& lightSpaceMatrix);
+    void paintFbo();
     void paintScreen();
 
     unsigned int depthMapFBO;
-    unsigned int depthMap;
-
+    unsigned int depthCubemap;
     const unsigned int SHADOW_WIDTH = 1024*2, SHADOW_HEIGHT = 1024*2;
+    QVector3D lightPos;
 };
 
-#endif // MYDEPTHTEXTURE_H
+#endif // POINTDEPTHTEXTURE_H

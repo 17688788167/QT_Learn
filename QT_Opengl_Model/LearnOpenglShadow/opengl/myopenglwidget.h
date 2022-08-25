@@ -25,6 +25,7 @@
 #include "framebuffer.h"
 #include "cube.h"
 #include "mydepthtexture.h"
+#include "pointdepthtexture.h"
 
 class Light;
 class MyOpenglWidget : public QOpenGLWidget,QOpenGLFunctions_3_3_Core
@@ -127,6 +128,7 @@ private:
     Planet* rocks=NULL;
 
     MyDepthTexture* depthTexture=NULL;
+    PointDepthTexture* pointDepthTexture=NULL;
 
 public:
     CubeActor* cube=NULL;
@@ -139,6 +141,8 @@ public:
 
     Screen* screen;
 public:
+
+    QVector3D lightPos;
     Mesh* processMesh();
     Mesh* processMesh(const float *vertices,int size,unsigned int textureId);
     Mesh* processMesh(const float *vertices,int size,unsigned int diffusetextureId,unsigned int speculartextureId);
@@ -160,8 +164,8 @@ public:
     unsigned int rboMultiSample;
     unsigned int multiSampleTex;
     void MultiFrameBuffer();
-
-
+public:
+ void renderScene(QOpenGLShaderProgram & shader);
 unsigned int uboMatrices;
 
 };

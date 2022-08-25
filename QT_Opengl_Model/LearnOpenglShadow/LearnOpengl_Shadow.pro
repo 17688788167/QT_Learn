@@ -44,7 +44,8 @@ SOURCES += \
     opengl/model/framebuffer.cpp \
     opengl/model/cube.cpp \
     opengl/model/plane.cpp \
-    opengl/model/mydepthtexture.cpp
+    opengl/model/mydepthtexture.cpp \
+    opengl/model/pointdepthtexture.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -67,7 +68,8 @@ HEADERS += \
     opengl/model/framebuffer.h \
     opengl/model/cube.h \
     opengl/model/plane.h \
-    opengl/model/mydepthtexture.h
+    opengl/model/mydepthtexture.h \
+    opengl/model/pointdepthtexture.h
 
 FORMS += \
         mainwindow.ui \
