@@ -6,7 +6,7 @@ void CubeActor::Draw(QOpenGLShaderProgram &shader)
     shader.bind();
     QMatrix4x4 model;
     model.setToIdentity();
-    model.translate(1,3,1);
+    model.translate(3,3,3);
     model.rotate(45,1,1,1);
 
 m_diffuse->bind(0);
@@ -24,7 +24,7 @@ m_specular->bind(1);
 
 
      model.setToIdentity();
-     model.translate(-3,1.0f,0);
+     model.translate(-5,-5.0f,-6);
      model.scale(1.5f);
      shader.setUniformValue("model",model);
      m_glFuns->glBindVertexArray(m_gldata.VAO);
@@ -39,7 +39,7 @@ m_specular->bind(1);
 
     model.setToIdentity();
 
-    model.scale(20);
+    model.scale(15);
     shader.setUniformValue("model",model);
 
 textureWall->bind(0);

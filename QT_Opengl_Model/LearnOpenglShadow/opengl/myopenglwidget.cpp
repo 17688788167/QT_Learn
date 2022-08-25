@@ -78,7 +78,7 @@ MyOpenglWidget::MyOpenglWidget(QWidget *parent) : QOpenGLWidget(parent)
     QSurfaceFormat format;
     format.setSamples(4);
     setFormat(format);
-    lightPos=QVector3D(0.0f, 3.0f, 0.0f);
+    lightPos=QVector3D(0.0f, 0.0f, 0.0f);
 }
 
 MyOpenglWidget::~MyOpenglWidget()
@@ -237,7 +237,8 @@ textureWall=new QOpenGLTexture(QImage(":/iamge/wall.jpg").mirrored());
     //m_lightMesh=processMesh(EMeshType::Light);
      m_light=new LightBase(m_glfuns,lightColor);
         reflectCube=new LightBase(m_glfuns,lightColor);
-    cubeMesh=processMesh(&Data::cubeVertices[0],36,m_diffuseTex->textureId());
+    cubeMesh=processMesh(&Data::cubeVertices[0],36,textureWall->textureId());
+    glEnable(GL_CULL_FACE);
 
     genSkyBoxVAOandVBO();
 
@@ -356,7 +357,7 @@ void MyOpenglWidget::paintGL()
     case Rect:
     glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
 
-   depthTexture->paintFbo(lightSpaceMatrix);
+   //depthTexture->paintFbo(lightSpaceMatrix);
   //renderScene(*depthTexture->m_DepthMapShaderProgram);
    //depthTexture->paintScreen();
 
@@ -366,14 +367,15 @@ void MyOpenglWidget::paintGL()
 
 
 
-   m_ShaderProgram.bind();
+
    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
    glEnable(GL_DEPTH_TEST);
    glDepthFunc(GL_LESS);
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
    glViewport(0, 0, width(), height());
-   m_ShaderProgram.setUniformValue("far_plane", far_plane);
-
+    m_ShaderProgram.bind();
+    m_ShaderProgram.setUniformValue("far_plane", far_plane);
+    m_ShaderProgram.setUniformValue("viewPos", m_camera.Position);
 
             m_ShaderProgram.setUniformValue("lightSpaceMatrix", lightSpaceMatrix);
             setObjectShader();
@@ -382,12 +384,13 @@ void MyOpenglWidget::paintGL()
             glBindTexture(GL_TEXTURE_2D, depthTexture->depthMap);
             m_ShaderProgram.setUniformValue("depthMap",3);
 
-            glActiveTexture(GL_TEXTURE4);
-            glBindTexture(GL_TEXTURE_2D, pointDepthTexture->depthCubemap);
-            m_ShaderProgram.setUniformValue("depthCubeMap",4);
+
+
+            glActiveTexture(GL_TEXTURE8);
+            m_ShaderProgram.setUniformValue("depthCubeMap",8);
+            glBindTexture(GL_TEXTURE_CUBE_MAP, pointDepthTexture->depthCubemap);
 
             renderScene(m_ShaderProgram);
-
             m_ShaderProgram.release();
 
 
@@ -687,11 +690,11 @@ void MyOpenglWidget::setObjectShader()
                                       m_ShaderProgram.setUniformValue(iStr.toStdString().c_str(),lightPos);
 
                                        iStr="pointlight["+QString::number(0)+"]."+"ambient";
-                                      m_ShaderProgram.setUniformValue(iStr.toStdString().c_str(),pointLightColor[0] *QVector3D(0.2f,0.2f,0.2f));
+                                      m_ShaderProgram.setUniformValue(iStr.toStdString().c_str(),pointLightColor    [0] *QVector3D(0.2f,0.2f,0.2f));
                                        iStr="pointlight["+QString::number(0)+"]."+"diffuse";
-                                      m_ShaderProgram.setUniformValue(iStr.toStdString().c_str(),pointLightColor[0] *QVector3D(0.5f,0.5f,0.5f));
+                                      m_ShaderProgram.setUniformValue(iStr.toStdString().c_str(),QVector3D(1,1,1)) ;
                                        iStr="pointlight["+QString::number(0)+"]."+"specular";
-                                      m_ShaderProgram.setUniformValue(iStr.toStdString().c_str(),pointLightColor[0]);
+                                      m_ShaderProgram.setUniformValue(iStr.toStdString().c_str(),QVector3D(1,1,1));
 
                                        iStr="pointlight["+QString::number(0)+"]."+"constant";
                                       m_ShaderProgram.setUniformValue(iStr.toStdString().c_str(),1.0f);
@@ -820,10 +823,53 @@ void MyOpenglWidget::renderScene(QOpenGLShaderProgram &shader)
 {
     QMatrix4x4 model;
     model.setToIdentity();
-    model.scale(10);
-    shader.setUniformValue("model", model);
-    plane->Draw(shader);
 
-    cube->Draw(shader);
+    // room cube
+    model.scale(5.0f);
+    shader.setUniformValue("model", model);
+    glDisable(GL_CULL_FACE); // note that we disable culling here since we render 'inside' the cube instead of the usual 'outside' which throws off the normal culling methods.
+    shader.setUniformValue("reverse_normals", 1); // A small little hack to invert normals when drawing cube from the inside so lighting still works.
+    cubeMesh->Draw(shader);
+    shader.setUniformValue("reverse_normals", 0); // and of course disable it
+    glEnable(GL_CULL_FACE);
+
+    // 三个箱子
+    model.setToIdentity();
+    model.translate(QVector3D(4.0f, -3.5f, 0.0));
+    model.scale(0.5);
+    shader.setUniformValue("model", model);
+    cubeMesh->Draw(shader);
+
+    model.setToIdentity();
+    model.translate(QVector3D(2.0f, 3.0f, 1.0));
+    model.scale(0.75);
+    shader.setUniformValue("model", model);
+    cubeMesh->Draw(shader);
+
+    model.setToIdentity();
+    model.translate(QVector3D(-3.0f, -1.0f, 0.0));
+    model.scale(0.5);
+    shader.setUniformValue("model", model);
+    cubeMesh->Draw(shader);
+
+    model.setToIdentity();
+    model.translate(QVector3D(-1.5f, 1.0f, 1.5));
+    model.scale(0.5);
+    //model.rotate(60,QVector3D(1.0, 0.0, 1.0));
+    shader.setUniformValue("model", model);
+    cubeMesh->Draw(shader);
+
+    model.setToIdentity();
+    model.translate(QVector3D(-1.5f, 2.0f, -3.0));
+    model.scale(0.75);
+    model.rotate(60,QVector3D(1.0, 0.0, 1.0));
+    shader.setUniformValue("model", model);
+    cubeMesh->Draw(shader);
+//    model.setToIdentity();
+//    model.scale(10);
+//    shader.setUniformValue("model", model);
+//    plane->Draw(shader);
+
+  //  cube->Draw(shader);
 
 }

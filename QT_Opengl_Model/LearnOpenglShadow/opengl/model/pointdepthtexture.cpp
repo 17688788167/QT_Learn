@@ -10,9 +10,10 @@ PointDepthTexture::PointDepthTexture(QOpenGLFunctions_3_3_Core *glfuns, MyOpengl
 {
     m_glfuns=glfuns;
     m_glwidget=glwidget;
+    lightPos=m_glwidget->lightPos;
     initScreen();
     initFbo();
-    lightPos=m_glwidget->lightPos;
+
 }
 
 void PointDepthTexture::initScreen()
@@ -39,7 +40,7 @@ void PointDepthTexture::initFbo()
     m_glfuns->glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     m_glfuns->glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     m_glfuns->glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    m_glfuns->glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    //m_glfuns->glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
 
     m_glfuns->glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
@@ -51,11 +52,15 @@ void PointDepthTexture::initFbo()
     if (m_glfuns->glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
         qDebug() << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << endl;
     m_glfuns->glBindFramebuffer(GL_FRAMEBUFFER, m_glwidget->defaultFramebufferObject());
+    m_glfuns->glEnable(GL_CULL_FACE);
 }
 
 void PointDepthTexture::paintFbo()
 {
-    float near_plane = 1.0f;
+     m_glfuns->glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+     m_glfuns->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    float near_plane = 0.1f;
     float far_plane  = 25.0f;
     QMatrix4x4 shadowProj;
     QMatrix4x4 shadowView;

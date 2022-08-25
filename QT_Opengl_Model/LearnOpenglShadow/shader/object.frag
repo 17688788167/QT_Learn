@@ -1,6 +1,5 @@
 #version 420 core
 
-//layout (depth_greater) out float gl_FragDepth;
 
 in VS_OUT
 {
@@ -22,7 +21,7 @@ uniform Material material;
 uniform sampler2D depthMap;
 
 float DirectShadowCalculation(vec4 fragPosLightSpace);
-float directShadow;
+
 
 //一个光源提供的不同的光照强度与光源的位置
 struct SpotLight
@@ -58,6 +57,7 @@ struct DirectLight
 uniform DirectLight directlight;
 vec3 CalcDirectLightColor(DirectLight light);
 
+
 struct PointLight
 {
     vec3 position;
@@ -75,7 +75,7 @@ struct PointLight
 #define NR_POINT_LIGHTS 4
 uniform PointLight[NR_POINT_LIGHTS] pointlight;
 vec3 CalcPointLightColor(PointLight light);
-
+float PointShadowCalculation(PointLight light);
 
 out vec4 FragColor;
 
@@ -99,21 +99,17 @@ vec3 viewDir=normalize(viewPos-fs_in.FragPos);
 uniform sampler2D textureTest;
 void main()
 {
-   directShadow=DirectShadowCalculation(fs_in.FragPosLightSpace);
+
 //冯氏光照模型 环境光照ambient,漫反射光照Diffuse,镜面光照Specular
     vec3 result=vec3(0,0,0);
     //result += CalcSpotLightColor(spotlight);
-    result += CalcDirectLightColor(directlight);
+   //result += CalcDirectLightColor(directlight);
 
 //    for(int i=0; i<NR_POINT_LIGHTS;++i)
 //    {
-        //result+=CalcPointLightColor(pointlight[0]);
+        result+=CalcPointLightColor(pointlight[0]);
 //    }
-       // vec3 I = normalize(fs_in.FragPos - viewPos);
-       // vec3 R = reflect(I, normalize(fs_in.Normal));
-       // vec3 reflectionSkyBox=texture(skybox,R).rgb;
-       // vec3 reflection=reflectionSkyBox*reflectionTexColor;
-    //result+=reflection;
+
 
         //result=texture(textureTest,fs_in.TexCoords).rgb;
     FragColor = vec4(result, 1.0);
@@ -157,6 +153,7 @@ vec3 CalcSpotLightColor(SpotLight light)
 
 vec3 CalcDirectLightColor(DirectLight light)
 {
+   float directShadow=DirectShadowCalculation(fs_in.FragPosLightSpace);
     //环境光照ambient
     vec3 ambient=light.ambient*diffuseTexColor;
 
@@ -171,35 +168,58 @@ vec3 CalcDirectLightColor(DirectLight light)
      float spec=pow(max(dot(norm,halfwayDir),0),material.shininess);
      vec3 specular=light.specular*spec*specularTexColor;
 
-      return ambient+(1.0-directShadow)*(diffuse+specular);
+      return ambient+/*(1.0-directShadow)**/(diffuse+specular);
 }
 
 vec3 CalcPointLightColor(PointLight light)
 {
-    //点光源会根据距离进行衰减，衰减的值用一个二次方程表示，并让环境光，漫反射光，镜面反射光都*=衰减因子
-    float distance=length(light.position-fs_in.FragPos);
-    float attenuation=1.0/(light.constant+light.linear*distance+light.quadratic*distance*distance);
 
-    //环境光照ambient
-    vec3 ambient=light.ambient*diffuseTexColor;
-    ambient*=attenuation;
+    float pointShadow=PointShadowCalculation(light);
+//    //点光源会根据距离进行衰减，衰减的值用一个二次方程表示，并让环境光，漫反射光，镜面反射光都*=衰减因子
+//    float distance=length(light.position-fs_in.FragPos);
+//    float attenuation=1.0/*/(light.constant+light.linear*distance+light.quadratic*distance*distance)*/;
 
-    //漫反射光照
-    vec3 lightDir=normalize(light.position-fs_in.FragPos);
-    float diff = max(dot(norm,lightDir),0.0);
-    vec3 diffuse=light.diffuse*diff*diffuseTexColor;
-    diffuse*=attenuation;
+//    //环境光照ambient
+//    vec3 ambient=light.ambient*diffuseTexColor;
+//    ambient*=attenuation;
 
-    //镜面光照
-    vec3 halfwayDir=normalize(lightDir+viewDir);
-    vec3 reflectDir=reflect(-lightDir,norm);
-    float spec=pow(max(dot(norm,halfwayDir),0),material.shininess);
-    vec3 specular=light.specular*spec*specularTexColor;
-    specular*=attenuation;
-    //return vec3(0,0,0);
-    //return vec3(0.1,0.1,0.1);
+//    //漫反射光照
+//    vec3 lightDir=normalize(light.position-fs_in.FragPos);
+//    float diff = max(dot(norm,lightDir),0.0);
+//    vec3 diffuse=light.diffuse*diff*diffuseTexColor;
+//    diffuse*=attenuation;
 
-    return ambient+(diffuse+specular);
+//    //镜面光照
+//    vec3 halfwayDir=normalize(lightDir+viewDir);
+//    vec3 reflectDir=reflect(-lightDir,norm);
+//    float spec=pow(max(dot(norm,halfwayDir),0),material.shininess);
+//    vec3 specular=light.specular*spec*specularTexColor;
+//    specular*=attenuation;
+//    //return vec3(0,0,0);
+//    //return vec3(0.1,0.1,0.1);
+
+//    return ambient+(1-pointShadow)*(diffuse+specular);
+
+    vec3 color = diffuseTexColor;
+    vec3 normal = normalize(fs_in.Normal);
+    vec3 lightColor = vec3(0.4);
+    // ambient
+    vec3 ambient = 0.3 * lightColor;
+    // diffuse
+    vec3 lightDir = normalize(light.position - fs_in.FragPos);
+    float diff = max(dot(lightDir, normal), 0.0);
+    vec3 diffuse = diff * lightColor;
+    // specular
+    vec3 viewDir = normalize(viewPos - fs_in.FragPos);
+
+    vec3 halfwayDir = normalize(lightDir + viewDir);
+    float spec = pow(max(dot(normal, halfwayDir), 0.0), 64.0);
+    vec3 specular = spec * lightColor;
+    // calculate shadow
+   // float shadow = shadows ? ShadowCalculation(fs_in.FragPos) : 0.0;
+    vec3 lighting = (ambient + (1.0 - pointShadow) * (diffuse + specular)) * color;
+
+    return lighting;
 }
 
 float DirectShadowCalculation(vec4 fragPosLightSpace)
@@ -235,4 +255,20 @@ float DirectShadowCalculation(vec4 fragPosLightSpace)
             shadow = 0.0;
 
  return shadow;
+}
+
+float PointShadowCalculation(PointLight light)
+{
+    vec3 fragToLight= fs_in.FragPos - light.position;
+
+   float closestDepth = texture(depthCubeMap, fragToLight).r;
+
+    closestDepth*=far_plane;
+    float currentDepth=length(fragToLight);
+
+    float bias=0.05;
+    float shadow=currentDepth-bias>closestDepth?1.0:0.0;
+
+
+    return shadow;
 }
