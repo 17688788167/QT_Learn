@@ -60,8 +60,7 @@ void PointDepthTexture::paintFbo()
      m_glfuns->glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
      m_glfuns->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    float near_plane = 0.1f;
-    float far_plane  = 25.0f;
+
     QMatrix4x4 shadowProj;
     QMatrix4x4 shadowView;
 

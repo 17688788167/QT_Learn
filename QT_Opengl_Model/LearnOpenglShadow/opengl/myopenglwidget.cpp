@@ -240,7 +240,7 @@ textureWall=new QOpenGLTexture(QImage(":/iamge/wall.jpg").mirrored());
     cubeMesh=processMesh(&Data::cubeVertices[0],36,textureWall->textureId());
     glEnable(GL_CULL_FACE);
 
-    genSkyBoxVAOandVBO();
+    genSkyBox();
 
     geometry=new Geometry(m_glfuns);
     screen=new Screen(m_glfuns,&screenShaderProgram);
@@ -374,7 +374,7 @@ void MyOpenglWidget::paintGL()
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
    glViewport(0, 0, width(), height());
     m_ShaderProgram.bind();
-    m_ShaderProgram.setUniformValue("far_plane", far_plane);
+    m_ShaderProgram.setUniformValue("far_plane",pointDepthTexture->far_plane);
     m_ShaderProgram.setUniformValue("viewPos", m_camera.Position);
 
             m_ShaderProgram.setUniformValue("lightSpaceMatrix", lightSpaceMatrix);
@@ -388,11 +388,29 @@ void MyOpenglWidget::paintGL()
 
             glActiveTexture(GL_TEXTURE8);
             m_ShaderProgram.setUniformValue("depthCubeMap",8);
-            glBindTexture(GL_TEXTURE_CUBE_MAP, pointDepthTexture->depthCubemap);
+           glBindTexture(GL_TEXTURE_CUBE_MAP,  pointDepthTexture->depthCubemap );
 
             renderScene(m_ShaderProgram);
             m_ShaderProgram.release();
 
+
+            // draw skybox as last
+            glDepthFunc(GL_LEQUAL); // 确保天空盒=1也能通过测试
+            skyshaderProgram.bind();
+            QMatrix4x4 skyboxView=view;// remove translation from the view matrix
+            skyboxView.setColumn(3,QVector4D(0.0f,0.0f,0.0f,1.0f));
+            skyshaderProgram.setUniformValue("skyView", skyboxView);
+            // skybox cube
+            glBindVertexArray(skyVAO);
+            glActiveTexture(GL_TEXTURE0);
+            //glBindTexture(GL_TEXTURE_CUBE_MAP, skyTexture->textureId());
+            glBindTexture(GL_TEXTURE_CUBE_MAP, pointDepthTexture->depthCubemap);
+
+            //m_ShaderProgram.setUniformValue("skybox",3);
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+            glBindVertexArray(0);
+            glDepthFunc(GL_LESS); // set depth function back to default
+            skyshaderProgram.release();
 
         break;
     }
@@ -760,6 +778,21 @@ void MyOpenglWidget::setShaderLight(QOpenGLShaderProgram &shader)
 
 void MyOpenglWidget::genSkyBoxVAOandVBO()
 {
+
+ //   skyTexture->setWrapMode(QOpenGLTexture::DirectionR, QOpenGLTexture::ClampToEdge);
+
+    // skybox VAO
+    glGenVertexArrays(1, &skyVAO);
+    glGenBuffers(1, &skyVBO);
+    glBindVertexArray(skyVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, skyVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(Data::skyboxVertices), &Data::skyboxVertices, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+}
+
+void MyOpenglWidget::genSkyBox()
+{
     genShader(skyshaderProgram,":/shader/skybox.vert",":/shader/skybox.frag");
     skyTexture=new QOpenGLTexture(QOpenGLTexture::TargetCubeMap);
     QImage _right   = QImage(":/skybox/right.jpg").convertToFormat(QImage::Format_RGB888);
@@ -782,16 +815,8 @@ void MyOpenglWidget::genSkyBoxVAOandVBO()
     skyTexture->setMagnificationFilter(QOpenGLTexture::Linear);
     skyTexture->setWrapMode(QOpenGLTexture::DirectionS, QOpenGLTexture::ClampToEdge);   //设置纹理边缘的扩展方法
     skyTexture->setWrapMode(QOpenGLTexture::DirectionT, QOpenGLTexture::ClampToEdge);
- //   skyTexture->setWrapMode(QOpenGLTexture::DirectionR, QOpenGLTexture::ClampToEdge);
 
-    // skybox VAO
-    glGenVertexArrays(1, &skyVAO);
-    glGenBuffers(1, &skyVBO);
-    glBindVertexArray(skyVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, skyVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(Data::skyboxVertices), &Data::skyboxVertices, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    genSkyBoxVAOandVBO();
 }
 
 void MyOpenglWidget::MultiFrameBuffer()
@@ -825,7 +850,7 @@ void MyOpenglWidget::renderScene(QOpenGLShaderProgram &shader)
     model.setToIdentity();
 
     // room cube
-    model.scale(5.0f);
+    model.scale(10.0f);
     shader.setUniformValue("model", model);
     glDisable(GL_CULL_FACE); // note that we disable culling here since we render 'inside' the cube instead of the usual 'outside' which throws off the normal culling methods.
     shader.setUniformValue("reverse_normals", 1); // A small little hack to invert normals when drawing cube from the inside so lighting still works.

@@ -261,9 +261,9 @@ float PointShadowCalculation(PointLight light)
 {
     vec3 fragToLight= fs_in.FragPos - light.position;
 
-   float closestDepth = texture(depthCubeMap, fragToLight).r;
+    float closestDepth = texture(depthCubeMap, fragToLight).r;
 
-    closestDepth*=far_plane;
+    closestDepth *= far_plane;
     float currentDepth=length(fragToLight);
 
     float bias=0.05;

@@ -37,6 +37,8 @@ public:
     void paintFbo();
     void paintScreen();
 
+    float near_plane = 0.1f;
+    float far_plane  = 25.0f;
     unsigned int depthMapFBO;
     unsigned int depthCubemap;
     const unsigned int SHADOW_WIDTH = 1024*2, SHADOW_HEIGHT = 1024*2;

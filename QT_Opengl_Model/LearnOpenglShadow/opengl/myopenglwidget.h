@@ -159,6 +159,7 @@ public:
     QOpenGLTexture * skyTexture;
     void genSkyBoxVAOandVBO();
 
+    void genSkyBox();
 
     unsigned int fboMultiSample;
     unsigned int rboMultiSample;
